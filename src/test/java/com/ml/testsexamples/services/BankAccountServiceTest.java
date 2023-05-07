@@ -3,6 +3,8 @@ package com.ml.testsexamples.services;
 import com.ml.testsexamples.dto.CustomerDataDto;
 import com.ml.testsexamples.enums.CustomerDataFields;
 import com.ml.testsexamples.repositories.CustomerDataRepository;
+import com.ml.testsexamples.utils.CustomDisplayNameGenerator;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -18,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @MockitoSettings
+@DisplayNameGeneration(CustomDisplayNameGenerator.class)
 public class BankAccountServiceTest {
 
     @Mock
@@ -101,7 +104,7 @@ public class BankAccountServiceTest {
     }
 
     @Test
-    public void findById_WithCustomerNotExists() {
+    public void findById_FindCustomerDataForNotExistsCustomerId_EmptyOptional() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
         Optional<CustomerDataDto> result = service.findById(1L);
@@ -154,7 +157,7 @@ public class BankAccountServiceTest {
     }
 
     @Test
-    public void update_UpdateBalance_WithNotExistsCustomer() {
+    public void update_TryToUpdateBalanceFieldForNotExistsCustomer_EmptyOptional() {
         when(repository.findById(3L)).thenReturn(Optional.empty());
 
         Optional<CustomerDataDto> result = service.update(3L, List.of(Pair.of(CustomerDataFields.BALANCE, "1000"), Pair.of(CustomerDataFields.BALANCE, "15000")));
@@ -162,7 +165,7 @@ public class BankAccountServiceTest {
     }
 
     @Test
-    public void update_UpdateBalance_WithUnauthorizedField() {
+    public void update_TryToUpdateUnauthorizedField_IllegalArgumentException() {
 
         CustomerDataDto.CustomerDataDtoBuilder customerDataBuilder = CustomerDataDto.builder();
 
