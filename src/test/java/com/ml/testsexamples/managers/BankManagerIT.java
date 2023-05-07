@@ -79,8 +79,12 @@ public class BankManagerIT {
         assertEquals("Roosevelt", result.get().getLastName());
         assertEquals(2500, result.get().getBalance().intValue());
         assertEquals(1500, result.get().getMinimumBalance().intValue());
-        assertInstanceOf(LocalDateTime.class, result.get().getCreatedAt());
-        assertInstanceOf(LocalDateTime.class, result.get().getUpdatedAt());
+
+        LocalDateTime createdAt = result.get().getCreatedAt();
+        LocalDateTime updatedAt = result.get().getUpdatedAt();
+
+        assertInstanceOf(LocalDateTime.class, createdAt);
+        assertInstanceOf(LocalDateTime.class, updatedAt);
 
         result = manager.withdraw(1L, 1000);
 
@@ -92,6 +96,9 @@ public class BankManagerIT {
         assertEquals(1500, result.get().getMinimumBalance().intValue());
         assertInstanceOf(LocalDateTime.class, result.get().getCreatedAt());
         assertInstanceOf(LocalDateTime.class, result.get().getUpdatedAt());
+
+        assertEquals(createdAt, result.get().getCreatedAt());
+        assertNotEquals(updatedAt, result.get().getUpdatedAt());
 
         assertThrows(InsufficientFundsException.class, () -> manager.withdraw(1L, 1000));
     }

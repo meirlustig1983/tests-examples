@@ -43,6 +43,7 @@ public class BankAccountService {
                     .balance(original.get().getBalance())
                     .minimumBalance(original.get().getMinimumBalance())
                     .active(original.get().isActive())
+                    .createdAt(original.get().getCreatedAt())
                     .build();
 
             for (Pair<BankAccountFields, String> pair : data) {
@@ -50,7 +51,8 @@ public class BankAccountService {
                     case FIRST_NAME -> updated.setFirstName(pair.getSecond());
                     case LAST_NAME -> updated.setLastName(pair.getSecond());
                     case BALANCE -> updated.setBalance(BigDecimal.valueOf(Double.parseDouble(pair.getSecond())));
-                    case MINIMUM_BALANCE -> updated.setMinimumBalance(BigDecimal.valueOf(Double.parseDouble(pair.getSecond())));
+                    case MINIMUM_BALANCE ->
+                            updated.setMinimumBalance(BigDecimal.valueOf(Double.parseDouble(pair.getSecond())));
                     case ACTIVE -> updated.setActive(Boolean.getBoolean(pair.getSecond()));
                     default -> throw new IllegalArgumentException("You are unauthorized to update this field.");
                 }

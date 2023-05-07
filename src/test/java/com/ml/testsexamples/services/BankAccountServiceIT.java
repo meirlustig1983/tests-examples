@@ -94,7 +94,23 @@ public class BankAccountServiceIT {
 
     @Test
     public void update() {
-        Optional<BankAccount> result = service.update(2L, List.of(Pair.of(BankAccountFields.FIRST_NAME, "Meir"),
+
+        Optional<BankAccount> result = service.findById(2L);
+
+        assertTrue(result.isPresent());
+        assertEquals(2L, result.get().getId());
+        assertEquals("Franklin", result.get().getFirstName());
+        assertEquals("Benjamin", result.get().getLastName());
+        assertEquals(0, result.get().getBalance().intValue());
+        assertEquals(-1000, result.get().getMinimumBalance().intValue());
+
+        LocalDateTime createdAt = result.get().getCreatedAt();
+        LocalDateTime updatedAt = result.get().getUpdatedAt();
+
+        assertInstanceOf(LocalDateTime.class, createdAt);
+        assertInstanceOf(LocalDateTime.class, updatedAt);
+
+        result = service.update(2L, List.of(Pair.of(BankAccountFields.FIRST_NAME, "Meir"),
                 Pair.of(BankAccountFields.LAST_NAME, "Roth"), Pair.of(BankAccountFields.BALANCE, "10000"),
                 Pair.of(BankAccountFields.MINIMUM_BALANCE, "0")));
 
@@ -106,6 +122,9 @@ public class BankAccountServiceIT {
         assertEquals(0, result.get().getMinimumBalance().intValue());
         assertInstanceOf(LocalDateTime.class, result.get().getCreatedAt());
         assertInstanceOf(LocalDateTime.class, result.get().getUpdatedAt());
+
+        assertEquals(createdAt, result.get().getCreatedAt());
+        assertNotEquals(updatedAt, result.get().getUpdatedAt());
     }
 
     @Test
