@@ -1,7 +1,7 @@
 package com.ml.testsexamples.managers;
 
-import com.ml.testsexamples.dto.CustomerDataDto;
-import com.ml.testsexamples.enums.CustomerDataFields;
+import com.ml.testsexamples.dto.BankAccount;
+import com.ml.testsexamples.enums.BankAccountFields;
 import com.ml.testsexamples.exceptions.InsufficientFundsException;
 import com.ml.testsexamples.services.BankAccountService;
 import jakarta.persistence.EntityNotFoundException;
@@ -12,10 +12,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.springframework.data.util.Pair;
 
-import java.util.Date;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -32,35 +34,37 @@ public class BankManagerTest {
     @DisplayName("Test deposit to customer. Customer[id = 1]")
     public void deposit() {
 
-        CustomerDataDto.CustomerDataDtoBuilder customerDataBuilder = CustomerDataDto.builder();
-        CustomerDataDto original = customerDataBuilder
+        BankAccount.BankAccountBuilder customerDataBuilder = BankAccount.builder();
+        BankAccount original = customerDataBuilder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
-                .balance(3500)
-                .minimumBalance(1500)
+                .balance(BigDecimal.valueOf(3500))
+                .minimumBalance(BigDecimal.valueOf(1500))
                 .build();
 
-        CustomerDataDto updated = customerDataBuilder
+        BankAccount updated = customerDataBuilder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
-                .balance(3550)
-                .minimumBalance(1500)
+                .balance(BigDecimal.valueOf(3550))
+                .minimumBalance(BigDecimal.valueOf(1500))
                 .build();
 
         when(service.findById(1L)).thenReturn(Optional.of(original));
-        when(service.update(1L, List.of(Pair.of(CustomerDataFields.BALANCE, "3550.0")))).thenReturn(Optional.of(updated));
+        when(service.update(1L, List.of(Pair.of(BankAccountFields.BALANCE, "3550.0")))).thenReturn(Optional.of(updated));
 
-        Optional<CustomerDataDto> result = manager.deposit(1L, 50);
+        Optional<BankAccount> result = manager.deposit(1L, 50);
 
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
-        assertEquals("Theodore", result.get().getFirstName());
-        assertEquals("Roosevelt", result.get().getLastName());
-        assertEquals(3550, result.get().getBalance());
-        assertEquals(1500, result.get().getMinimumBalance());
-        assertInstanceOf(Date.class, result.get().getCreatedDate());
+        BankAccount bankAccount = result.get();
+        assertThat(bankAccount.getId()).isEqualTo(1L);
+        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
+        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3550);
+        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
+        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
     }
 
     @Test
@@ -75,35 +79,37 @@ public class BankManagerTest {
     @DisplayName("Test withdraw from a customer. Customer[id = 1]")
     public void withdraw() {
 
-        CustomerDataDto.CustomerDataDtoBuilder customerDataBuilder = CustomerDataDto.builder();
-        CustomerDataDto original = customerDataBuilder
+        BankAccount.BankAccountBuilder customerDataBuilder = BankAccount.builder();
+        BankAccount original = customerDataBuilder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
-                .balance(3500)
-                .minimumBalance(1500)
+                .balance(BigDecimal.valueOf(3500))
+                .minimumBalance(BigDecimal.valueOf(1500))
                 .build();
 
-        CustomerDataDto updated = customerDataBuilder
+        BankAccount updated = customerDataBuilder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
-                .balance(1500)
-                .minimumBalance(1500)
+                .balance(BigDecimal.valueOf(1500))
+                .minimumBalance(BigDecimal.valueOf(1500))
                 .build();
 
         when(service.findById(1L)).thenReturn(Optional.of(original));
-        when(service.update(1L, List.of(Pair.of(CustomerDataFields.BALANCE, "1500.0")))).thenReturn(Optional.of(updated));
+        when(service.update(1L, List.of(Pair.of(BankAccountFields.BALANCE, "1500.0")))).thenReturn(Optional.of(updated));
 
-        Optional<CustomerDataDto> result = manager.withdraw(1L, 2000);
+        Optional<BankAccount> result = manager.withdraw(1L, 2000);
 
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
-        assertEquals("Theodore", result.get().getFirstName());
-        assertEquals("Roosevelt", result.get().getLastName());
-        assertEquals(1500, result.get().getBalance());
-        assertEquals(1500, result.get().getMinimumBalance());
-        assertInstanceOf(Date.class, result.get().getCreatedDate());
+        BankAccount bankAccount = result.get();
+        assertThat(bankAccount.getId()).isEqualTo(1L);
+        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
+        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccount.getBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
+        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
     }
 
     @Test
@@ -116,13 +122,13 @@ public class BankManagerTest {
     @Test
     @DisplayName("Test a withdraw from a customer with not enough money in his account. Customer[id = 1], result=InsufficientFundsException")
     public void withdraw_WithNInsufficientFundsException() {
-        CustomerDataDto.CustomerDataDtoBuilder customerDataBuilder = CustomerDataDto.builder();
-        CustomerDataDto original = customerDataBuilder
+        BankAccount.BankAccountBuilder customerDataBuilder = BankAccount.builder();
+        BankAccount original = customerDataBuilder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
-                .balance(3500)
-                .minimumBalance(1500)
+                .balance(BigDecimal.valueOf(3500))
+                .minimumBalance(BigDecimal.valueOf(1500))
                 .build();
 
         when(service.findById(1L)).thenReturn(Optional.of(original));
