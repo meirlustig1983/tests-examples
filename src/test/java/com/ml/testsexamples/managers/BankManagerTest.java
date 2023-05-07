@@ -5,6 +5,7 @@ import com.ml.testsexamples.enums.CustomerDataFields;
 import com.ml.testsexamples.exceptions.InsufficientFundsException;
 import com.ml.testsexamples.services.BankAccountService;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,6 +29,7 @@ public class BankManagerTest {
     private BankManager manager;
 
     @Test
+    @DisplayName("Test deposit to customer. Customer[id = 1]")
     public void deposit() {
 
         CustomerDataDto.CustomerDataDtoBuilder customerDataBuilder = CustomerDataDto.builder();
@@ -62,6 +64,7 @@ public class BankManagerTest {
     }
 
     @Test
+    @DisplayName("Test deposit to not-exists customer. Customer[id = 3], result=EntityNotFoundException")
     public void deposit_WithNotExistsCustomer() {
         when(service.findById(3L)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class, () -> manager.deposit(3L, 50));
@@ -69,6 +72,7 @@ public class BankManagerTest {
 
 
     @Test
+    @DisplayName("Test withdraw from a customer. Customer[id = 1]")
     public void withdraw() {
 
         CustomerDataDto.CustomerDataDtoBuilder customerDataBuilder = CustomerDataDto.builder();
@@ -103,12 +107,14 @@ public class BankManagerTest {
     }
 
     @Test
+    @DisplayName("Test withdraw from not-exists customer. Customer[id = 3], result=EntityNotFoundException")
     public void withdraw_WithNotExistsCustomer() {
         when(service.findById(3L)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class, () -> manager.withdraw(3L, 50));
     }
 
     @Test
+    @DisplayName("Test a withdraw from a customer with not enough money in his account. Customer[id = 1], result=InsufficientFundsException")
     public void withdraw_WithNInsufficientFundsException() {
         CustomerDataDto.CustomerDataDtoBuilder customerDataBuilder = CustomerDataDto.builder();
         CustomerDataDto original = customerDataBuilder

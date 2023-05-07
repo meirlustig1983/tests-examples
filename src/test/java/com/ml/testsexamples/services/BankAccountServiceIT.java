@@ -2,6 +2,8 @@ package com.ml.testsexamples.services;
 
 import com.ml.testsexamples.dto.CustomerDataDto;
 import com.ml.testsexamples.enums.CustomerDataFields;
+import com.ml.testsexamples.utils.CustomDisplayNameGenerator;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 @Transactional
+@DisplayNameGeneration(CustomDisplayNameGenerator.class)
 public class BankAccountServiceIT {
 
     @Autowired
@@ -50,7 +53,7 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    public void findById_WithFirstCustomerData() {
+    public void findById_TryToFindCustomerDataForFirstCustomer_DataSuccessfullyReceived() {
 
         Optional<CustomerDataDto> result = service.findById(1L);
 
@@ -64,7 +67,7 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    public void findById_WithSecondCustomerData() {
+    public void findById_TryToFindCustomerDataForSecondCustomer_DataSuccessfullyReceived() {
 
         Optional<CustomerDataDto> result = service.findById(2L);
 
@@ -78,7 +81,7 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    public void findById_WithNotExistsCustomer() {
+    public void findById_TryToFindCustomerDataForNotExistsCustomer_EmptyOptional() {
         Optional<CustomerDataDto> result = service.findById(3L);
         assertFalse(result.isPresent());
     }
@@ -99,19 +102,13 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    public void update_UpdateBalance_WithUnauthorizedField() {
+    public void update_TryToUpdateUnauthorizedField_IllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> service.update(1L, List.of(Pair.of(CustomerDataFields.ID, "1000"), Pair.of(CustomerDataFields.BALANCE, "8500"))));
     }
 
     @Test
-    public void update_UpdateBalance_WithNotExistsCustomer() {
+    public void update_TryToUpdateBalanceFieldForNotExistsCustomer_EmptyOptional() {
         Optional<CustomerDataDto> result = service.update(3L, List.of(Pair.of(CustomerDataFields.BALANCE, "1000"), Pair.of(CustomerDataFields.BALANCE, "15000")));
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void findById_CustomerNotExists() {
-        Optional<CustomerDataDto> result = service.findById(3L);
         assertFalse(result.isPresent());
     }
 }
