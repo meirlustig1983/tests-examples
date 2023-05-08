@@ -33,9 +33,9 @@ public class BankAccountServiceTest {
     @Test
     public void getAll() {
 
-        BankAccount.BankAccountBuilder customerDataBuilder = BankAccount.builder();
+        BankAccount.BankAccountBuilder builder = BankAccount.builder();
 
-        BankAccount customerData1 = customerDataBuilder
+        BankAccount bankAccount1 = builder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
@@ -43,7 +43,7 @@ public class BankAccountServiceTest {
                 .minimumBalance(BigDecimal.valueOf(1500))
                 .build();
 
-        BankAccount customerData2 = customerDataBuilder
+        BankAccount bankAccount2 = builder
                 .id(2L)
                 .firstName("Franklin")
                 .lastName("Benjamin")
@@ -51,7 +51,7 @@ public class BankAccountServiceTest {
                 .minimumBalance(BigDecimal.valueOf(-1000))
                 .build();
 
-        when(repository.findAll()).thenReturn(List.of(customerData1, customerData2));
+        when(repository.findAll()).thenReturn(List.of(bankAccount1, bankAccount2));
 
         List<BankAccount> result = service.findAll();
 
@@ -81,8 +81,8 @@ public class BankAccountServiceTest {
     @Test
     public void findById() {
 
-        BankAccount.BankAccountBuilder customerDataBuilder = BankAccount.builder();
-        BankAccount customerData1 = customerDataBuilder
+        BankAccount.BankAccountBuilder builder = BankAccount.builder();
+        BankAccount bankAccount1 = builder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
@@ -90,7 +90,7 @@ public class BankAccountServiceTest {
                 .minimumBalance(BigDecimal.valueOf(1500))
                 .build();
 
-        when(repository.findById(1L)).thenReturn(Optional.of(customerData1));
+        when(repository.findById(1L)).thenReturn(Optional.of(bankAccount1));
 
         Optional<BankAccount> result = service.findById(1L);
 
@@ -108,7 +108,7 @@ public class BankAccountServiceTest {
     }
 
     @Test
-    public void findById_FindCustomerDataForNotExistsCustomerId_EmptyOptional() {
+    public void findById_FindBankAccountForNotExistsAccountId_EmptyOptional() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
         Optional<BankAccount> result = service.findById(1L);
@@ -122,9 +122,9 @@ public class BankAccountServiceTest {
     @Test
     public void update() {
 
-        BankAccount.BankAccountBuilder customerDataBuilder = BankAccount.builder();
+        BankAccount.BankAccountBuilder builder = BankAccount.builder();
 
-        BankAccount originalDto = customerDataBuilder
+        BankAccount bankAccount = builder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
@@ -132,7 +132,7 @@ public class BankAccountServiceTest {
                 .minimumBalance(BigDecimal.valueOf(1500))
                 .build();
 
-        BankAccount updatedDto = customerDataBuilder
+        BankAccount updatedBankAccount = builder
                 .id(1L)
                 .firstName("Meir")
                 .lastName("Roth")
@@ -140,8 +140,8 @@ public class BankAccountServiceTest {
                 .minimumBalance(BigDecimal.valueOf(0))
                 .build();
 
-        when(repository.findById(1L)).thenReturn(Optional.of(originalDto));
-        when(repository.save(any(BankAccount.class))).thenReturn(updatedDto);
+        when(repository.findById(1L)).thenReturn(Optional.of(bankAccount));
+        when(repository.save(any(BankAccount.class))).thenReturn(updatedBankAccount);
 
         Optional<BankAccount> result = service.update(1L, List.of(Pair.of(BankAccountFields.FIRST_NAME, "Meir"),
                 Pair.of(BankAccountFields.LAST_NAME, "Roth"), Pair.of(BankAccountFields.BALANCE, "10000"),
@@ -162,7 +162,7 @@ public class BankAccountServiceTest {
     }
 
     @Test
-    public void update_TryToUpdateBalanceFieldForNotExistsCustomer_EmptyOptional() {
+    public void update_TryToUpdateBalanceFieldForNotExistsBankAccount_EmptyOptional() {
         when(repository.findById(3L)).thenReturn(Optional.empty());
 
         Optional<BankAccount> result = service.update(3L, List.of(Pair.of(BankAccountFields.BALANCE, "1000"), Pair.of(BankAccountFields.BALANCE, "15000")));
@@ -172,9 +172,9 @@ public class BankAccountServiceTest {
     @Test
     public void update_TryToUpdateUnauthorizedField_IllegalArgumentException() {
 
-        BankAccount.BankAccountBuilder customerDataBuilder = BankAccount.builder();
+        BankAccount.BankAccountBuilder builder = BankAccount.builder();
 
-        BankAccount originalDto = customerDataBuilder
+        BankAccount originalDto = builder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
