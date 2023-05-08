@@ -20,11 +20,20 @@ public class BankManager {
 
     private final BankAccountService service;
 
+    public Optional<BankAccount> info(Long id) {
+        log.info("BankManager.info(id) - get info about bank account. id: {}", id);
+        Optional<BankAccount> bankAccount = service.findById(id);
+        if (bankAccount.isEmpty()) {
+            throw new EntityNotFoundException("Invalid bank account");
+        }
+        return bankAccount;
+    }
+
     public Optional<BankAccount> deposit(Long id, double amount) {
         log.info("BankManager.deposit(id,amount) - make a deposit to bank account. id: {}, amount: {}", id, amount);
         Optional<BankAccount> original = service.findById(id);
         if (original.isEmpty()) {
-            throw new EntityNotFoundException("Invalid customer data ID");
+            throw new EntityNotFoundException("Invalid bank account");
         }
         return service.update(id, List.of(Pair.of(BankAccountFields.BALANCE, Double.toString(original.get().getBalance().doubleValue() + amount))));
     }
@@ -33,7 +42,7 @@ public class BankManager {
         log.info("BankManager.withdraw(id,amount) - make a withdraw for bank account. id: {}, amount: {}", id, amount);
         Optional<BankAccount> original = service.findById(id);
         if (original.isEmpty()) {
-            throw new EntityNotFoundException("Invalid bank account id");
+            throw new EntityNotFoundException("Invalid bank account");
         }
         if (original.get().getBalance().doubleValue() - amount < original.get().getMinimumBalance().doubleValue()) {
             throw new InsufficientFundsException("Insufficient funds exception");

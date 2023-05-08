@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
@@ -31,11 +32,73 @@ public class BankManagerTest {
     private BankManager manager;
 
     @Test
-    @DisplayName("Test deposit to customer. Customer[id = 1]")
+    @DisplayName("Test get an info about bank account and run some tests it the account is active. BankAccount[id = 1]")
+    public void info_GetInfoForFirstAccount() {
+
+        BankAccount.BankAccountBuilder builder = BankAccount.builder();
+        BankAccount original = builder
+                .id(1L)
+                .firstName("Theodore")
+                .lastName("Roosevelt")
+                .balance(BigDecimal.valueOf(3500))
+                .minimumBalance(BigDecimal.valueOf(1500))
+                .active(true)
+                .build();
+
+        when(service.findById(1L)).thenReturn(Optional.of(original));
+
+        Optional<BankAccount> result = manager.info(1L);
+
+        assertTrue(result.isPresent());
+        assumeTrue(result.get().isActive(), "The account is not active");
+        BankAccount bankAccount = result.get();
+        assertThat(bankAccount.getId()).isEqualTo(1L);
+        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
+        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3500);
+        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
+        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
+        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+    }
+
+    @Test
+    @DisplayName("Test get an info about bank account and run some tests it the account is active. BankAccount[id = 1]")
+    public void info_GetInfoForSecondAccount() {
+
+        BankAccount.BankAccountBuilder builder = BankAccount.builder();
+        BankAccount original = builder
+                .id(2L)
+                .firstName("Franklin")
+                .lastName("Benjamin")
+                .balance(BigDecimal.valueOf(3500))
+                .minimumBalance(BigDecimal.valueOf(1500))
+                .active(false)
+                .build();
+
+        when(service.findById(1L)).thenReturn(Optional.of(original));
+
+        Optional<BankAccount> result = manager.info(1L);
+
+        assertTrue(result.isPresent());
+        assumeTrue(result.get().isActive(), "The account is not active");
+        BankAccount bankAccount = result.get();
+        assertThat(bankAccount.getId()).isEqualTo(2L);
+        assertThat(bankAccount.getFirstName()).isEqualTo("Franklin");
+        assertThat(bankAccount.getLastName()).isEqualTo("Benjamin");
+        assertThat(bankAccount.getBalance().intValue()).isEqualTo(0);
+        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(-1000);
+        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
+        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
+        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+    }
+
+    @Test
+    @DisplayName("Test deposit to bank account. BankAccount[id = 1]")
     public void deposit() {
 
-        BankAccount.BankAccountBuilder customerDataBuilder = BankAccount.builder();
-        BankAccount original = customerDataBuilder
+        BankAccount.BankAccountBuilder builder = BankAccount.builder();
+        BankAccount original = builder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
@@ -43,7 +106,7 @@ public class BankManagerTest {
                 .minimumBalance(BigDecimal.valueOf(1500))
                 .build();
 
-        BankAccount updated = customerDataBuilder
+        BankAccount updated = builder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
@@ -69,19 +132,19 @@ public class BankManagerTest {
     }
 
     @Test
-    @DisplayName("Test deposit to not-exists customer. Customer[id = 3], result=EntityNotFoundException")
-    public void deposit_WithNotExistsCustomer() {
+    @DisplayName("Test deposit to not-exists bank account. BankAccount[id = 3], result=EntityNotFoundException")
+    public void deposit_WithNotExistsBankAccount() {
         when(service.findById(3L)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class, () -> manager.deposit(3L, 50));
     }
 
 
     @Test
-    @DisplayName("Test withdraw from a customer. Customer[id = 1]")
+    @DisplayName("Test withdraw from a bank account. BankAccount[id = 1]")
     public void withdraw() {
 
-        BankAccount.BankAccountBuilder customerDataBuilder = BankAccount.builder();
-        BankAccount original = customerDataBuilder
+        BankAccount.BankAccountBuilder builder = BankAccount.builder();
+        BankAccount original = builder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
@@ -89,7 +152,7 @@ public class BankManagerTest {
                 .minimumBalance(BigDecimal.valueOf(1500))
                 .build();
 
-        BankAccount updated = customerDataBuilder
+        BankAccount updated = builder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
@@ -115,17 +178,17 @@ public class BankManagerTest {
     }
 
     @Test
-    @DisplayName("Test withdraw from not-exists customer. Customer[id = 3], result=EntityNotFoundException")
-    public void withdraw_WithNotExistsCustomer() {
+    @DisplayName("Test withdraw from not-exists bank account. BankAccount[id = 3], result=EntityNotFoundException")
+    public void withdraw_WithNotExistsBankAccount() {
         when(service.findById(3L)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class, () -> manager.withdraw(3L, 50));
     }
 
     @Test
-    @DisplayName("Test a withdraw from a customer with not enough money in his account. Customer[id = 1], result=InsufficientFundsException")
+    @DisplayName("Test a withdraw from a bank account with not enough money. BankAccount[id = 1], result=InsufficientFundsException")
     public void withdraw_WithNInsufficientFundsException() {
-        BankAccount.BankAccountBuilder customerDataBuilder = BankAccount.builder();
-        BankAccount original = customerDataBuilder
+        BankAccount.BankAccountBuilder builder = BankAccount.builder();
+        BankAccount original = builder
                 .id(1L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")

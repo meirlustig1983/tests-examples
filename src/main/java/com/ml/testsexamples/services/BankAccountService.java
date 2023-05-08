@@ -35,8 +35,8 @@ public class BankAccountService {
         if (original.isEmpty()) {
             return Optional.empty();
         } else {
-            BankAccount.BankAccountBuilder customerDataBuilder = BankAccount.builder();
-            BankAccount updated = customerDataBuilder
+            BankAccount.BankAccountBuilder builder = BankAccount.builder();
+            BankAccount updated = builder
                     .id(original.get().getId())
                     .firstName(original.get().getFirstName())
                     .lastName(original.get().getLastName())

@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumingThat;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -31,7 +32,26 @@ public class BankManagerIT {
     private BankManager manager;
 
     @Test
-    @DisplayName("Test deposit to a customer. Customer[id = 1]")
+    @DisplayName("Test get info about bank account. BankAccount[id = 1]")
+    public void info() {
+
+        Optional<BankAccount> result = manager.info(1L);
+
+        assertTrue(result.isPresent());
+        BankAccount bankAccount = result.get();
+
+        assumingThat(bankAccount.isActive(), () -> assertThat(bankAccount.getId()).isEqualTo(1L));
+        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
+        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3500);
+        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
+        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
+        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+    }
+
+    @Test
+    @DisplayName("Test deposit to a bank account. BankAccount[id = 1]")
     public void deposit() {
 
         Optional<BankAccount> result = manager.deposit(1L, 50);
@@ -49,19 +69,19 @@ public class BankManagerIT {
     }
 
     @Test
-    @DisplayName("Test deposit to a customer and measure time. Customer[id = 1]")
+    @DisplayName("Test deposit to a bank account and measure time. BankAccount[id = 1]")
     public void deposit_measureTime() {
         assertTimeout(Duration.ofMillis(50), () -> manager.deposit(1L, 50));
     }
 
     @Test
-    @DisplayName("Test deposit to a not-exists customer. Customer[id = 3], result=EntityNotFoundException")
-    public void deposit_WithNotExistsCustomer() {
+    @DisplayName("Test deposit to a not-exists bank account. BankAccount[id = 3], result=EntityNotFoundException")
+    public void deposit_WithNotExistsBankAccount() {
         assertThrows(EntityNotFoundException.class, () -> manager.deposit(3L, 50));
     }
 
     @Test
-    @DisplayName("Test withdraw from a customer. Customer[id = 1]")
+    @DisplayName("Test withdraw from a bank account. BankAccount[id = 1]")
     public void withdraw() {
 
         Optional<BankAccount> result = manager.withdraw(1L, 1999);
@@ -79,13 +99,13 @@ public class BankManagerIT {
     }
 
     @Test
-    @DisplayName("Test withdraw from a customer and measure time. Customer[id = 1]")
+    @DisplayName("Test withdraw from a bank account and measure time. BankAccount[id = 1]")
     public void withdraw_measureTime() {
         assertTimeout(Duration.ofMillis(50), () -> manager.withdraw(1L, 50));
     }
 
     @Test
-    @DisplayName("Test withdraw from a customer until he run-out of his money. Customer[id = 1]")
+    @DisplayName("Test withdraw from a bank account until it run-out of the money. BankAccount[id = 1]")
     public void withdraw_BelowMinimum() {
 
         Optional<BankAccount> result = manager.withdraw(1L, 1000);
@@ -126,19 +146,19 @@ public class BankManagerIT {
     }
 
     @Test
-    @DisplayName("Test withdraw from a not-exists customer. Customer[id = 3], result=EntityNotFoundException")
-    public void withdraw_WithNotExistsCustomer() {
+    @DisplayName("Test withdraw from a not-exists bank account. BankAccount[id = 3], result=EntityNotFoundException")
+    public void withdraw_WithNotExistsBankAccount() {
         assertThrows(EntityNotFoundException.class, () -> manager.withdraw(3L, 50));
     }
 
     @Test
-    @DisplayName("Test withdraw from a customer with not enough money in his account. Customer[id = 1], result=InsufficientFundsException")
+    @DisplayName("Test withdraw from a bank account with not enough money in his account. BankAccount[id = 1], result=InsufficientFundsException")
     public void withdraw_WithNInsufficientFundsException() {
         assertThrows(InsufficientFundsException.class, () -> manager.withdraw(1L, 2001));
     }
 
     @Test
-    @DisplayName("Test withdraw and deposit a few times for the same bank account. Customer[id = 1], result=InsufficientFundsException")
+    @DisplayName("Test withdraw and deposit a few times for the same bank account. BankAccount[id = 1], result=InsufficientFundsException")
     public void withdraw_deposit() {
 
         assertAll(() -> manager.withdraw(1L, 100), () -> manager.withdraw(1L, 100),

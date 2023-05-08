@@ -57,7 +57,7 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    public void findById_TryToFindCustomerDataForFirstCustomer_DataSuccessfullyReceived() {
+    public void findById_TryToFindBankAccountForFirstAccountId_DataSuccessfullyReceived() {
 
         Optional<BankAccount> result = service.findById(1L);
 
@@ -72,7 +72,7 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    public void findById_TryToFindCustomerDataForSecondCustomer_DataSuccessfullyReceived() {
+    public void findById_TryToFindBankAccountForSecondAccountId_DataSuccessfullyReceived() {
 
         Optional<BankAccount> result = service.findById(2L);
 
@@ -87,7 +87,7 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    public void findById_TryToFindCustomerDataForNotExistsCustomer_EmptyOptional() {
+    public void findById_TryToFindBankAccountForNotExistsAccountId_EmptyOptional() {
         Optional<BankAccount> result = service.findById(3L);
         assertFalse(result.isPresent());
     }
@@ -133,7 +133,7 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    public void update_TryToUpdateBalanceFieldForNotExistsCustomer_EmptyOptional() {
+    public void update_TryToUpdateBalanceFieldForNotExistsAccountId_EmptyOptional() {
         Optional<BankAccount> result = service.update(3L, List.of(Pair.of(BankAccountFields.BALANCE, "1000"), Pair.of(BankAccountFields.BALANCE, "15000")));
         assertFalse(result.isPresent());
     }
