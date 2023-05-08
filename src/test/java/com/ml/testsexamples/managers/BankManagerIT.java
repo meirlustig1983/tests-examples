@@ -16,6 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -36,13 +37,15 @@ public class BankManagerIT {
         Optional<BankAccount> result = manager.deposit(1L, 50);
 
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
-        assertEquals("Theodore", result.get().getFirstName());
-        assertEquals("Roosevelt", result.get().getLastName());
-        assertEquals(3550, result.get().getBalance().intValue());
-        assertEquals(1500, result.get().getMinimumBalance().intValue());
-        assertInstanceOf(LocalDateTime.class, result.get().getCreatedAt());
-        assertInstanceOf(LocalDateTime.class, result.get().getUpdatedAt());
+        BankAccount bankAccount = result.get();
+        assertThat(bankAccount.getId()).isEqualTo(1L);
+        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
+        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3550);
+        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
+        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
+        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
     }
 
     @Test
@@ -55,16 +58,18 @@ public class BankManagerIT {
     @DisplayName("Test withdraw from a customer. Customer[id = 1]")
     public void withdraw() {
 
-        Optional<BankAccount> result = manager.withdraw(1L, 2000);
+        Optional<BankAccount> result = manager.withdraw(1L, 1999);
 
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
-        assertEquals("Theodore", result.get().getFirstName());
-        assertEquals("Roosevelt", result.get().getLastName());
-        assertEquals(1500, result.get().getBalance().intValue());
-        assertEquals(1500, result.get().getMinimumBalance().intValue());
-        assertInstanceOf(LocalDateTime.class, result.get().getCreatedAt());
-        assertInstanceOf(LocalDateTime.class, result.get().getUpdatedAt());
+        BankAccount bankAccount = result.get();
+        assertThat(bankAccount.getId()).isEqualTo(1L);
+        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
+        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccount.getBalance().intValue()).isEqualTo(1501);
+        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
+        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
+        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
     }
 
     @Test
@@ -74,11 +79,13 @@ public class BankManagerIT {
         Optional<BankAccount> result = manager.withdraw(1L, 1000);
 
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
-        assertEquals("Theodore", result.get().getFirstName());
-        assertEquals("Roosevelt", result.get().getLastName());
-        assertEquals(2500, result.get().getBalance().intValue());
-        assertEquals(1500, result.get().getMinimumBalance().intValue());
+        BankAccount bankAccount = result.get();
+        assertThat(bankAccount.getId()).isEqualTo(1L);
+        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
+        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccount.getBalance().intValue()).isEqualTo(2500);
+        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
 
         LocalDateTime createdAt = result.get().getCreatedAt();
         LocalDateTime updatedAt = result.get().getUpdatedAt();
@@ -89,16 +96,19 @@ public class BankManagerIT {
         result = manager.withdraw(1L, 1000);
 
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
-        assertEquals("Theodore", result.get().getFirstName());
-        assertEquals("Roosevelt", result.get().getLastName());
-        assertEquals(1500, result.get().getBalance().intValue());
-        assertEquals(1500, result.get().getMinimumBalance().intValue());
-        assertInstanceOf(LocalDateTime.class, result.get().getCreatedAt());
-        assertInstanceOf(LocalDateTime.class, result.get().getUpdatedAt());
+        bankAccount = result.get();
+        assertThat(bankAccount.getId()).isEqualTo(1L);
+        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
+        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccount.getBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccount.getBalance().doubleValue()).isEqualTo(bankAccount.getMinimumBalance().doubleValue());
+        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
+        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
 
-        assertEquals(createdAt, result.get().getCreatedAt());
-        assertNotEquals(updatedAt, result.get().getUpdatedAt());
+        assertThat(result.get().getCreatedAt()).isEqualTo(createdAt);
+        assertThat(result.get().getUpdatedAt()).isNotEqualTo(createdAt);
+        assertThat(result.get().getUpdatedAt()).isNotEqualTo(updatedAt);
 
         assertThrows(InsufficientFundsException.class, () -> manager.withdraw(1L, 1000));
     }
