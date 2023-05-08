@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -31,7 +32,6 @@ public class BankManagerIT {
 
     @Test
     @DisplayName("Test deposit to a customer. Customer[id = 1]")
-    @Sql(scripts = "/data/recreate-datasets.sql")
     public void deposit() {
 
         Optional<BankAccount> result = manager.deposit(1L, 50);
@@ -46,6 +46,12 @@ public class BankManagerIT {
         assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
         assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
         assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+    }
+
+    @Test
+    @DisplayName("Test deposit to a customer and measure time. Customer[id = 1]")
+    public void deposit_measureTime() {
+        assertTimeout(Duration.ofMillis(50), () -> manager.deposit(1L, 50));
     }
 
     @Test
@@ -73,8 +79,14 @@ public class BankManagerIT {
     }
 
     @Test
+    @DisplayName("Test withdraw from a customer and measure time. Customer[id = 1]")
+    public void withdraw_measureTime() {
+        assertTimeout(Duration.ofMillis(50), () -> manager.withdraw(1L, 50));
+    }
+
+    @Test
     @DisplayName("Test withdraw from a customer until he run-out of his money. Customer[id = 1]")
-    public void withdraw_FewTimes() {
+    public void withdraw_BelowMinimum() {
 
         Optional<BankAccount> result = manager.withdraw(1L, 1000);
 
@@ -125,4 +137,25 @@ public class BankManagerIT {
         assertThrows(InsufficientFundsException.class, () -> manager.withdraw(1L, 2001));
     }
 
+    @Test
+    @DisplayName("Test withdraw and deposit a few times for the same bank account. Customer[id = 1], result=InsufficientFundsException")
+    public void withdraw_deposit() {
+
+        assertAll(() -> manager.withdraw(1L, 100), () -> manager.withdraw(1L, 100),
+                () -> manager.withdraw(1L, 100), () -> manager.deposit(1L, 1000),
+                () -> manager.withdraw(1L, 100), () -> manager.withdraw(1L, 100));
+
+        Optional<BankAccount> result = manager.withdraw(1L, 1);
+
+        assertTrue(result.isPresent());
+        BankAccount bankAccount = result.get();
+        assertThat(bankAccount.getId()).isEqualTo(1L);
+        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
+        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3999);
+        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
+        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
+        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+    }
 }
