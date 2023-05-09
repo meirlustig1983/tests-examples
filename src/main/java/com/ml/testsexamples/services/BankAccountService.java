@@ -29,6 +29,11 @@ public class BankAccountService {
         return repository.findById(id);
     }
 
+    public Optional<BankAccount> save(BankAccount bankAccount) {
+        log.info("BankAccountService.save(bankAccount) - save bank account");
+        return Optional.of(repository.save(bankAccount));
+    }
+
     public Optional<BankAccount> update(Long id, List<Pair<BankAccountFields, String>> data) {
         log.info("BankAccountService.update(id) - update bank account data by id. id: {}, data: {}", id, data);
         Optional<BankAccount> original = repository.findById(id);
@@ -59,5 +64,10 @@ public class BankAccountService {
             }
             return Optional.of(repository.save(updated));
         }
+    }
+
+    public void delete(BankAccount bankAccount) {
+        log.info("BankAccountService.delete(bankAccount) - delete bank account");
+        repository.delete(bankAccount);
     }
 }
