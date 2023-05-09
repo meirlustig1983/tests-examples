@@ -1,4 +1,4 @@
-package com.ml.testsexamples.dto;
+package com.ml.testsexamples.dao;
 
 import lombok.*;
 import jakarta.persistence.*;
@@ -18,7 +18,15 @@ import java.time.LocalDateTime;
 public class BankAccount {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(
+            name = "bank_account_id_sequence",
+            sequenceName = "bank_account_id_sequence",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "bank_account_id_sequence"
+    )
     @EqualsAndHashCode.Exclude
     private Long id;
 

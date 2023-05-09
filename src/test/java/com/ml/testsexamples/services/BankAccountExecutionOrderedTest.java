@@ -1,6 +1,6 @@
 package com.ml.testsexamples.services;
 
-import com.ml.testsexamples.dto.BankAccount;
+import com.ml.testsexamples.dao.BankAccount;
 import org.junit.jupiter.api.*;
 
 import java.math.BigDecimal;

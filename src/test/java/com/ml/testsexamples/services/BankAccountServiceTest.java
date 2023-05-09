@@ -1,6 +1,6 @@
 package com.ml.testsexamples.services;
 
-import com.ml.testsexamples.dto.BankAccount;
+import com.ml.testsexamples.dao.BankAccount;
 import com.ml.testsexamples.enums.BankAccountFields;
 import com.ml.testsexamples.repositories.BankAccountRepository;
 import com.ml.testsexamples.utils.CustomDisplayNameGenerator;
