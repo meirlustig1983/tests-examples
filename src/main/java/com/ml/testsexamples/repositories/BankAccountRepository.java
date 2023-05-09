@@ -1,11 +1,7 @@
 package com.ml.testsexamples.repositories;
 
-import com.ml.testsexamples.dto.BankAccount;
-import lombok.NonNull;
-import org.springframework.data.repository.CrudRepository;
+import com.ml.testsexamples.dao.BankAccount;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
-public interface BankAccountRepository extends CrudRepository<BankAccount, Long> {
-    @NonNull List<BankAccount> findAll();
+public interface BankAccountRepository extends JpaRepository<BankAccount, Long> {
 }

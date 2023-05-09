@@ -1,6 +1,6 @@
 package com.ml.testsexamples.managers;
 
-import com.ml.testsexamples.dto.BankAccount;
+import com.ml.testsexamples.dao.BankAccount;
 import com.ml.testsexamples.enums.BankAccountFields;
 import com.ml.testsexamples.exceptions.InsufficientFundsException;
 import com.ml.testsexamples.services.BankAccountService;

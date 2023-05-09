@@ -1,6 +1,6 @@
 package com.ml.testsexamples.services;
 
-import com.ml.testsexamples.dto.BankAccount;
+import com.ml.testsexamples.dao.BankAccount;
 import com.ml.testsexamples.enums.BankAccountFields;
 import com.ml.testsexamples.repositories.BankAccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +27,11 @@ public class BankAccountService {
     public Optional<BankAccount> findById(Long id) {
         log.info("BankAccountService.getById(id) - retrieving bank account data by id. id: {}", id);
         return repository.findById(id);
+    }
+
+    public Optional<BankAccount> save(BankAccount bankAccount) {
+        log.info("BankAccountService.save(bankAccount) - save bank account");
+        return Optional.of(repository.save(bankAccount));
     }
 
     public Optional<BankAccount> update(Long id, List<Pair<BankAccountFields, String>> data) {
@@ -59,5 +64,10 @@ public class BankAccountService {
             }
             return Optional.of(repository.save(updated));
         }
+    }
+
+    public void delete(BankAccount bankAccount) {
+        log.info("BankAccountService.delete(bankAccount) - delete bank account");
+        repository.delete(bankAccount);
     }
 }
