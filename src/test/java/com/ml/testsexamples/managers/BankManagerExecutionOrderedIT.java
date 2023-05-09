@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @DisplayNameGeneration(CustomDisplayNameGenerator.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class BankManagerExecutionOrderedTest {
+public class BankManagerExecutionOrderedIT {
 
     @Autowired
     private BankManager bankManager;
@@ -30,39 +30,39 @@ public class BankManagerExecutionOrderedTest {
         assertTrue(bankAccount.isPresent());
         assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
         assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
-        assertThat(bankAccount.get().getBalance().doubleValue()).isEqualTo(1000);
-        assertThat(bankAccount.get().getMinimumBalance().doubleValue()).isEqualTo(500);
-        assertThat(bankAccount.get().isActive()).isEqualTo(true);
-    }
-
-    @Test
-    @Order(2)
-    public void deposit_MakeDepositFor500_BalanceChangedTo1500() {
-        Optional<BankAccount> bankAccount = bankManager.deposit(1L, 500);
-        assertTrue(bankAccount.isPresent());
-        assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
-        assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
-        assertThat(bankAccount.get().getBalance().doubleValue()).isEqualTo(1500);
-        assertThat(bankAccount.get().getMinimumBalance().doubleValue()).isEqualTo(500);
-        assertThat(bankAccount.get().isActive()).isEqualTo(true);
-    }
-
-    @Test
-    @Order(3)
-    public void deposit_MakeDepositFor500_BalanceChangedTo2000() {
-        Optional<BankAccount> bankAccount = bankManager.deposit(1L, 500);
-        assertTrue(bankAccount.isPresent());
-        assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
-        assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
         assertThat(bankAccount.get().getBalance().doubleValue()).isEqualTo(2000);
         assertThat(bankAccount.get().getMinimumBalance().doubleValue()).isEqualTo(500);
         assertThat(bankAccount.get().isActive()).isEqualTo(true);
     }
 
     @Test
+    @Order(2)
+    public void deposit_MakeDepositFor500_BalanceChangedTo2500() {
+        Optional<BankAccount> bankAccount = bankManager.deposit(1L, 500);
+        assertTrue(bankAccount.isPresent());
+        assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
+        assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
+        assertThat(bankAccount.get().getBalance().doubleValue()).isEqualTo(2500);
+        assertThat(bankAccount.get().getMinimumBalance().doubleValue()).isEqualTo(500);
+        assertThat(bankAccount.get().isActive()).isEqualTo(true);
+    }
+
+    @Test
+    @Order(3)
+    public void deposit_MakeDepositFor500_BalanceChangedTo3000() {
+        Optional<BankAccount> bankAccount = bankManager.deposit(1L, 500);
+        assertTrue(bankAccount.isPresent());
+        assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
+        assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
+        assertThat(bankAccount.get().getBalance().doubleValue()).isEqualTo(3000);
+        assertThat(bankAccount.get().getMinimumBalance().doubleValue()).isEqualTo(500);
+        assertThat(bankAccount.get().isActive()).isEqualTo(true);
+    }
+
+    @Test
     @Order(4)
-    public void deposit_MakeWithdrawFor1500_BalanceChangedTo500() {
-        Optional<BankAccount> bankAccount = bankManager.withdraw(1L, 1500);
+    public void withdraw_MakeWithdrawFor2500_BalanceChangedTo500() {
+        Optional<BankAccount> bankAccount = bankManager.withdraw(1L, 2500);
         assertTrue(bankAccount.isPresent());
         assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
         assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
@@ -73,7 +73,7 @@ public class BankManagerExecutionOrderedTest {
 
     @Test
     @Order(5)
-    public void deposit_MakeWithdrawFor1500_ThrowsInsufficientFundsException() {
+    public void withdraw_MakeWithdrawFor1500_ThrowsInsufficientFundsException() {
         assertThrows(InsufficientFundsException.class, () -> bankManager.withdraw(1L, 1500));
     }
 }
