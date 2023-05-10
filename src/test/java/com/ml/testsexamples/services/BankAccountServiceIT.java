@@ -6,6 +6,7 @@ import com.ml.testsexamples.utils.CustomDisplayNameGenerator;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.util.Pair;
@@ -14,6 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayNameGeneration(CustomDisplayNameGenerator.class)
 @Transactional
 @Sql(scripts = "/data/recreate-datasets.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Timeout(value = 5)
 public class BankAccountServiceIT {
 
     @Autowired

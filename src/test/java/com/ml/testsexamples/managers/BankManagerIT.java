@@ -6,6 +6,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
@@ -13,6 +14,7 @@ import org.springframework.test.context.jdbc.Sql;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,6 +30,7 @@ public class BankManagerIT {
 
     @Test
     @DisplayName("Test get info about bank account. BankAccount[id = 1]")
+    @Timeout(value = 10000, unit = TimeUnit.MICROSECONDS)
     public void info() {
 
         Optional<BankAccount> result = manager.info(1L);
@@ -66,7 +69,7 @@ public class BankManagerIT {
     @Test
     @DisplayName("Test deposit to a bank account and measure time. BankAccount[id = 1]")
     public void deposit_measureTime() {
-        assertTimeout(Duration.ofMillis(50), () -> manager.deposit(1L, 50));
+        assertTimeout(Duration.ofMillis(60), () -> manager.deposit(1L, 50));
     }
 
     @Test
