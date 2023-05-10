@@ -1,28 +1,23 @@
 package com.ml.testsexamples.services;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoSettings;
+import org.junit.jupiter.api.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@MockitoSettings
-class GreetingServiceTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class GreetingServiceWithBeforeAndAfterTest {
 
-    @InjectMocks
     private GreetingService service;
 
-    @BeforeEach
+    @BeforeAll
     public void init(){
-        System.out.println("Start a new test");
+        System.out.println("Start a new test class");
+        service = new GreetingService();
     }
 
-    @AfterEach
+    @AfterAll
     public void end(){
-        System.out.println("End test");
+        System.out.println("End of test class");
     }
 
     @Test
