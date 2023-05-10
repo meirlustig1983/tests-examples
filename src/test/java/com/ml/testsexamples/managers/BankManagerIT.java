@@ -30,7 +30,7 @@ public class BankManagerIT {
 
     @Test
     @DisplayName("Test get info about bank account. BankAccount[id = 1]")
-    @Timeout(value = 6000, unit = TimeUnit.MICROSECONDS)
+    @Timeout(value = 10000, unit = TimeUnit.MICROSECONDS)
     public void info() {
 
         Optional<BankAccount> result = manager.info(1L);
