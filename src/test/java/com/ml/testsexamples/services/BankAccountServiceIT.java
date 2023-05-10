@@ -6,13 +6,10 @@ import com.ml.testsexamples.utils.CustomDisplayNameGenerator;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.util.Pair;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,8 +18,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
-@ExtendWith(MockitoExtension.class)
 @DisplayNameGeneration(CustomDisplayNameGenerator.class)
 @Transactional
 @Sql(scripts = "/data/recreate-datasets.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
