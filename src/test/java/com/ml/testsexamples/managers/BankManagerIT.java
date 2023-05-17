@@ -7,6 +7,10 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.condition.EnabledOnJre;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.JRE;
+import org.junit.jupiter.api.condition.OS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
@@ -29,9 +33,32 @@ public class BankManagerIT {
     private BankManager manager;
 
     @Test
-    @DisplayName("Test get info about bank account. BankAccount[id = 1]")
-    @Timeout(value = 10000, unit = TimeUnit.MICROSECONDS)
-    public void info() {
+    @DisplayName("Test get info about bank account, if (OS is MAC) & (JRE is JAVA_17). BankAccount[id = 1]")
+    @Timeout(value = 2500, unit = TimeUnit.MICROSECONDS)
+    @EnabledOnOs({OS.MAC})
+    @EnabledOnJre({JRE.JAVA_17})
+    public void info_EnabledOnOsMAC_EnabledOnJre17() {
+
+        Optional<BankAccount> result = manager.info(1L);
+
+        assertTrue(result.isPresent());
+        BankAccount bankAccount = result.get();
+
+        assumingThat(bankAccount.isActive(), () -> assertThat(bankAccount.getId()).isEqualTo(1L));
+        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
+        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3500);
+        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
+        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
+        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+    }
+
+    @Test
+    @DisplayName("Test get info about bank account, if (OS is LINUX). BankAccount[id = 1]")
+    @Timeout(value = 3000, unit = TimeUnit.MICROSECONDS)
+    @EnabledOnOs({OS.LINUX})
+    public void info_EnabledOnOsLINUX() {
 
         Optional<BankAccount> result = manager.info(1L);
 
