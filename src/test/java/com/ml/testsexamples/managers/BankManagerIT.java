@@ -61,7 +61,7 @@ public class BankManagerIT {
     public void info_EnabledOnOsLINUX() {
 
         Optional<BankAccount> result = manager.info(1L);
-
+System.out.println("XXX MEIR");
         assertTrue(result.isPresent());
         BankAccount bankAccount = result.get();
 
