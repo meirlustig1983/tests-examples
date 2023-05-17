@@ -57,7 +57,7 @@ public class BankManagerIT {
     @Test
     @DisplayName("Test get info about bank account, if (OS is LINUX). BankAccount[id = 1]")
     @Timeout(value = 2000, unit = TimeUnit.MICROSECONDS)
-    @EnabledOnOs({OS.MAC})
+    @EnabledOnOs({OS.LINUX})
     public void info_EnabledOnOsLINUX() {
 
         Optional<BankAccount> result = manager.info(1L);
