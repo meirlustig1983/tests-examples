@@ -1,4 +1,4 @@
-package com.ml.testsexamples.services;
+package com.ml.testsexamples.facades;
 
 import com.ml.testsexamples.dao.BankAccount;
 import org.junit.jupiter.api.*;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class BankAccountExecutionOrderedTest {
+public class DataFacadeExecutionOrderedTest {
 
     private static BankAccount bankAccount;
 

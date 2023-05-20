@@ -1,4 +1,4 @@
-package com.ml.testsexamples.services;
+package com.ml.testsexamples.facades;
 
 import com.ml.testsexamples.dao.BankAccount;
 import com.ml.testsexamples.enums.BankAccountFields;
@@ -24,15 +24,15 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 @Sql(scripts = "/data/recreate-datasets.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DisplayNameGeneration(CustomDisplayNameGenerator.class)
-public class BankAccountServiceParameterizedIT {
+public class DataFacadeParameterizedIT {
 
     @Autowired
-    private BankAccountService service;
+    private DataFacade dataFacade;
 
     @ParameterizedTest
     @ValueSource(strings = {"100", "200", "400", "800"})
-    public void update_TryToUpdateBalance_BalanceHasBeenUpdated(String balance) {
-        Optional<BankAccount> result = service.update(1L, List.of(Pair.of(BankAccountFields.BALANCE, balance)));
+    public void updateBankAccount_TryToUpdateBalance_BalanceHasBeenUpdated(String balance) {
+        Optional<BankAccount> result = dataFacade.updateBankAccount(1L, List.of(Pair.of(BankAccountFields.BALANCE, balance)));
         assertTrue(result.isPresent());
         BankAccount bankAccountResult = result.get();
         assertThat(bankAccountResult.getId().intValue()).isEqualTo(1);
@@ -41,8 +41,8 @@ public class BankAccountServiceParameterizedIT {
 
     @ParameterizedTest
     @CsvSource({"100, 200", "400, 800"})
-    public void update_TryToUpdateBalanceAndMinimumBalanced_BalanceAndMinimumHasBeenUpdated(String balance, String minimumBalance) {
-        Optional<BankAccount> result = service.update(1L, List.of(Pair.of(BankAccountFields.BALANCE, balance), Pair.of(BankAccountFields.MINIMUM_BALANCE, minimumBalance)));
+    public void updateBankAccount_TryToUpdateBalanceAndMinimumBalanced_BalanceAndMinimumHasBeenUpdated(String balance, String minimumBalance) {
+        Optional<BankAccount> result = dataFacade.updateBankAccount(1L, List.of(Pair.of(BankAccountFields.BALANCE, balance), Pair.of(BankAccountFields.MINIMUM_BALANCE, minimumBalance)));
         assertTrue(result.isPresent());
         BankAccount bankAccountResult = result.get();
         assertThat(bankAccountResult.getId().intValue()).isEqualTo(1);
@@ -52,8 +52,8 @@ public class BankAccountServiceParameterizedIT {
 
     @ParameterizedTest
     @CsvFileSource(resources = "/tests/tests-data.csv", delimiter = ',')
-    public void update_TryToUpdateAllDataFieldsFromCsvFile_AllDataHasBeenUpdated(String firstName, String lastName, String balance, String minimumBalance) {
-        Optional<BankAccount> result = service.update(1L, List.of(Pair.of(BankAccountFields.FIRST_NAME, firstName),
+    public void updateBankAccount_TryToUpdateAllDataFieldsFromCsvFile_AllDataHasBeenUpdated(String firstName, String lastName, String balance, String minimumBalance) {
+        Optional<BankAccount> result = dataFacade.updateBankAccount(1L, List.of(Pair.of(BankAccountFields.FIRST_NAME, firstName),
                 Pair.of(BankAccountFields.LAST_NAME, lastName),
                 Pair.of(BankAccountFields.BALANCE, balance),
                 Pair.of(BankAccountFields.MINIMUM_BALANCE, minimumBalance)));
