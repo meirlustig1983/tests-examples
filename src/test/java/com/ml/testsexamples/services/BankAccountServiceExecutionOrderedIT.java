@@ -1,4 +1,4 @@
-package com.ml.testsexamples.managers;
+package com.ml.testsexamples.services;
 
 import com.ml.testsexamples.dao.BankAccount;
 import com.ml.testsexamples.exceptions.InsufficientFundsException;
@@ -17,16 +17,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @DisplayNameGeneration(CustomDisplayNameGenerator.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class BankManagerExecutionOrderedIT {
+public class BankAccountServiceExecutionOrderedIT {
 
     @Autowired
-    private BankManager bankManager;
+    private BankAccountService service;
 
     @Test
     @Order(1)
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:/data/recreate-datasets-2.sql")
-    public void info() {
-        Optional<BankAccount> bankAccount = bankManager.info(1L);
+    public void getAccountInfo() {
+        Optional<BankAccount> bankAccount = service.getAccountInfo(1L);
         assertTrue(bankAccount.isPresent());
         assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
         assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
@@ -37,8 +37,8 @@ public class BankManagerExecutionOrderedIT {
 
     @Test
     @Order(2)
-    public void deposit_MakeDepositFor500_BalanceChangedTo2500() {
-        Optional<BankAccount> bankAccount = bankManager.deposit(1L, 500);
+    public void makeDeposit_MakeDepositFor500_BalanceChangedTo2500() {
+        Optional<BankAccount> bankAccount = service.makeDeposit(1L, 500);
         assertTrue(bankAccount.isPresent());
         assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
         assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
@@ -49,8 +49,8 @@ public class BankManagerExecutionOrderedIT {
 
     @Test
     @Order(3)
-    public void deposit_MakeDepositFor500_BalanceChangedTo3000() {
-        Optional<BankAccount> bankAccount = bankManager.deposit(1L, 500);
+    public void makeDeposit_MakeDepositFor500_BalanceChangedTo3000() {
+        Optional<BankAccount> bankAccount = service.makeDeposit(1L, 500);
         assertTrue(bankAccount.isPresent());
         assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
         assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
@@ -61,8 +61,8 @@ public class BankManagerExecutionOrderedIT {
 
     @Test
     @Order(4)
-    public void withdraw_MakeWithdrawFor2500_BalanceChangedTo500() {
-        Optional<BankAccount> bankAccount = bankManager.withdraw(1L, 2500);
+    public void makeWithdraw_MakeWithdrawFor2500_BalanceChangedTo500() {
+        Optional<BankAccount> bankAccount = service.makeWithdraw(1L, 2500);
         assertTrue(bankAccount.isPresent());
         assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
         assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
@@ -73,7 +73,7 @@ public class BankManagerExecutionOrderedIT {
 
     @Test
     @Order(5)
-    public void withdraw_MakeWithdrawFor1500_ThrowsInsufficientFundsException() {
-        assertThrows(InsufficientFundsException.class, () -> bankManager.withdraw(1L, 1500));
+    public void makeWithdraw_MakeWithdrawFor1500_ThrowsInsufficientFundsException() {
+        assertThrows(InsufficientFundsException.class, () -> service.makeWithdraw(1L, 1500));
     }
 }

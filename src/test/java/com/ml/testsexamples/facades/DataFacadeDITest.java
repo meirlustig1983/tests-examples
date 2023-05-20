@@ -1,4 +1,4 @@
-package com.ml.testsexamples.services;
+package com.ml.testsexamples.facades;
 
 import com.ml.testsexamples.dao.BankAccount;
 import com.ml.testsexamples.dao.BankAccountParameterResolver;
@@ -21,19 +21,20 @@ import static org.mockito.Mockito.*;
 @MockitoSettings
 @DisplayNameGeneration(CustomDisplayNameGenerator.class)
 @ExtendWith(BankAccountParameterResolver.class)
-public class BankAccountServiceDITest {
+public class DataFacadeDITest {
 
     @Mock
     private BankAccountRepository repository;
 
     @InjectMocks
-    private BankAccountService service;
+    private DataFacade dataFacade;
 
     @Test
-    public void getAll(BankAccount bankAccount) {
+    public void findAllBankAccounts(BankAccount bankAccount) {
+
         when(repository.findAll()).thenReturn(List.of(bankAccount));
 
-        List<BankAccount> result = service.findAll();
+        List<BankAccount> result = dataFacade.findAllBankAccounts();
 
         assertNotNull(result);
         assertEquals(1, result.size());

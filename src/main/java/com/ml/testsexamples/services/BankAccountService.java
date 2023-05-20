@@ -2,13 +2,15 @@ package com.ml.testsexamples.services;
 
 import com.ml.testsexamples.dao.BankAccount;
 import com.ml.testsexamples.enums.BankAccountFields;
-import com.ml.testsexamples.repositories.BankAccountRepository;
+import com.ml.testsexamples.exceptions.InactiveAccountException;
+import com.ml.testsexamples.exceptions.InsufficientFundsException;
+import com.ml.testsexamples.facades.DataFacade;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,57 +19,66 @@ import java.util.Optional;
 @Service
 public class BankAccountService {
 
-    private final BankAccountRepository repository;
+    private final DataFacade dataFacade;
 
-    public List<BankAccount> findAll() {
-        log.info("BankAccountService.getAll() - retrieving all bank accounts data.");
-        return repository.findAll();
-    }
-
-    public Optional<BankAccount> findById(Long id) {
-        log.info("BankAccountService.getById(id) - retrieving bank account data by id. id: {}", id);
-        return repository.findById(id);
-    }
-
-    public Optional<BankAccount> save(BankAccount bankAccount) {
-        log.info("BankAccountService.save(bankAccount) - save bank account");
-        return Optional.of(repository.save(bankAccount));
-    }
-
-    public Optional<BankAccount> update(Long id, List<Pair<BankAccountFields, String>> data) {
-        log.info("BankAccountService.update(id) - update bank account data by id. id: {}, data: {}", id, data);
-        Optional<BankAccount> original = repository.findById(id);
-        if (original.isEmpty()) {
-            return Optional.empty();
-        } else {
-            BankAccount.BankAccountBuilder builder = BankAccount.builder();
-            BankAccount updated = builder
-                    .id(original.get().getId())
-                    .firstName(original.get().getFirstName())
-                    .lastName(original.get().getLastName())
-                    .balance(original.get().getBalance())
-                    .minimumBalance(original.get().getMinimumBalance())
-                    .active(original.get().isActive())
-                    .createdAt(original.get().getCreatedAt())
-                    .build();
-
-            for (Pair<BankAccountFields, String> pair : data) {
-                switch (pair.getFirst()) {
-                    case FIRST_NAME -> updated.setFirstName(pair.getSecond());
-                    case LAST_NAME -> updated.setLastName(pair.getSecond());
-                    case BALANCE -> updated.setBalance(BigDecimal.valueOf(Double.parseDouble(pair.getSecond())));
-                    case MINIMUM_BALANCE ->
-                            updated.setMinimumBalance(BigDecimal.valueOf(Double.parseDouble(pair.getSecond())));
-                    case ACTIVE -> updated.setActive(Boolean.getBoolean(pair.getSecond()));
-                    default -> throw new IllegalArgumentException("You are unauthorized to update this field.");
-                }
-            }
-            return Optional.of(repository.save(updated));
+    public Optional<BankAccount> getAccountInfo(Long id) {
+        log.info("BankAccountService.getAccountInfo(id) - get info about bank account. id: {}", id);
+        Optional<BankAccount> bankAccount = dataFacade.findBankAccountById(id);
+        if (bankAccount.isEmpty()) {
+            throw new EntityNotFoundException("Invalid bank account");
         }
+        return bankAccount;
     }
 
-    public void delete(BankAccount bankAccount) {
-        log.info("BankAccountService.delete(bankAccount) - delete bank account");
-        repository.delete(bankAccount);
+    public Optional<BankAccount> createAccount(BankAccount bankAccount) {
+        log.info("BankAccountService.createAccount(bankAccount) - create bank account");
+        return dataFacade.saveBankAccount(bankAccount);
+    }
+
+    public void deleteBankAccountById(Long id) {
+        log.info("BankAccountService.deleteBankAccountById(id) - delete bank account. id: {}", id);
+        dataFacade.deleteBankAccountById(id);
+    }
+
+    public Optional<BankAccount> activateAccount(Long id) {
+        log.info("BankAccountService.activateAccount(id) - make a bank account active. id: {}", id);
+        Optional<BankAccount> original = dataFacade.findBankAccountById(id);
+        if (original.isEmpty()) {
+            throw new EntityNotFoundException("Invalid bank account");
+        }
+        return dataFacade.updateBankAccount(id, List.of(Pair.of(BankAccountFields.ACTIVE, "true")));
+    }
+
+    public Optional<BankAccount> deactivateAccount(Long id) {
+        log.info("BankAccountService.deactivateAccount(id) - make a bank account inactive. id: {}", id);
+        Optional<BankAccount> original = dataFacade.findBankAccountById(id);
+        if (original.isEmpty()) {
+            throw new EntityNotFoundException("Invalid bank account");
+        }
+        return dataFacade.updateBankAccount(id, List.of(Pair.of(BankAccountFields.ACTIVE, "false")));
+    }
+
+    public Optional<BankAccount> makeDeposit(Long id, double amount) {
+        log.info("BankAccountService.makeDeposit(id,amount) - make a deposit to bank account. id: {}, amount: {}", id, amount);
+        Optional<BankAccount> original = dataFacade.findBankAccountById(id);
+        if (original.isEmpty()) {
+            throw new EntityNotFoundException("Invalid bank account");
+        } else if (!original.get().isActive()) {
+            throw new InactiveAccountException("Inactive bank account");
+        }
+        return dataFacade.updateBankAccount(id, List.of(Pair.of(BankAccountFields.BALANCE, Double.toString(original.get().getBalance().doubleValue() + amount))));
+    }
+
+    public Optional<BankAccount> makeWithdraw(Long id, double amount) {
+        log.info("BankAccountService.makeWithdraw(id, amount) - make a withdraw for bank account. id: {}, amount: {}", id, amount);
+        Optional<BankAccount> original = dataFacade.findBankAccountById(id);
+        if (original.isEmpty()) {
+            throw new EntityNotFoundException("Invalid bank account");
+        } else if (!original.get().isActive()) {
+            throw new InactiveAccountException("Inactive bank account");
+        } else if (original.get().getBalance().doubleValue() - amount < original.get().getMinimumBalance().doubleValue()) {
+            throw new InsufficientFundsException("Insufficient funds exception");
+        }
+        return dataFacade.updateBankAccount(id, List.of(Pair.of(BankAccountFields.BALANCE, Double.toString(original.get().getBalance().doubleValue() - amount))));
     }
 }
