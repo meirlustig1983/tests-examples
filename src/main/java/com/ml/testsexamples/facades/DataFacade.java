@@ -6,7 +6,7 @@ import com.ml.testsexamples.repositories.BankAccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
-@Service
+@Component
 public class DataFacade {
 
     private final BankAccountRepository bankAccountRepository;
