@@ -1,10 +1,12 @@
 package com.ml.testsexamples.services;
 
 import com.ml.testsexamples.dao.BankAccount;
+import com.ml.testsexamples.dto.BankAccountDto;
 import com.ml.testsexamples.enums.BankAccountFields;
 import com.ml.testsexamples.exceptions.InactiveAccountException;
 import com.ml.testsexamples.exceptions.InsufficientFundsException;
 import com.ml.testsexamples.facades.DataFacade;
+import com.ml.testsexamples.mappers.BankAccountMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.springframework.data.util.Pair;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,9 @@ public class BankAccountServiceTest {
 
     @Mock
     private DataFacade dataFacade;
+
+    @Mock
+    private BankAccountMapper mapper;
 
     @InjectMocks
     private BankAccountService service;
@@ -46,21 +50,22 @@ public class BankAccountServiceTest {
                 .active(true)
                 .build();
 
-        when(dataFacade.findBankAccountById(1L)).thenReturn(Optional.of(original));
+        BankAccountDto originalBankAccountDto = new BankAccountDto("Theodore", "Roosevelt",
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500), true);
 
-        Optional<BankAccount> result = service.getAccountInfo(1L);
+        when(dataFacade.findBankAccountById(1L)).thenReturn(Optional.of(original));
+        when(mapper.toDto(original)).thenReturn(originalBankAccountDto);
+
+        Optional<BankAccountDto> result = service.getAccountInfo(1L);
 
         assertTrue(result.isPresent());
-        assumeTrue(result.get().isActive(), "The account is not active");
-        BankAccount bankAccount = result.get();
-        assertThat(bankAccount.getId()).isEqualTo(1L);
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3500);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
-        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+        assumeTrue(result.get().active(), "The account is not active");
+        BankAccountDto bankAccountDto = result.get();
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(3500);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
 
         verify(dataFacade).findBankAccountById(1L);
         verifyNoMoreInteractions(dataFacade);
@@ -81,7 +86,7 @@ public class BankAccountServiceTest {
     public void createAccount() {
 
         BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount original = builder
+        BankAccount originalBankAccount = builder
                 .id(3L)
                 .firstName("Theodore")
                 .lastName("Roosevelt")
@@ -90,23 +95,25 @@ public class BankAccountServiceTest {
                 .active(true)
                 .build();
 
-        when(dataFacade.saveBankAccount(original)).thenReturn(Optional.of(original));
+        BankAccountDto originalBankAccountDto = new BankAccountDto("Theodore", "Roosevelt",
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500), true);
 
-        Optional<BankAccount> result = service.createAccount(original);
+        when(dataFacade.saveBankAccount(originalBankAccount)).thenReturn(Optional.of(originalBankAccount));
+        when(mapper.toDto(originalBankAccount)).thenReturn(originalBankAccountDto);
+        when(mapper.toDao(originalBankAccountDto)).thenReturn(originalBankAccount);
+
+        Optional<BankAccountDto> result = service.createAccount(originalBankAccountDto);
 
         assertTrue(result.isPresent());
-        assumeTrue(result.get().isActive(), "The account is not active");
-        BankAccount bankAccount = result.get();
-        assertThat(bankAccount.getId()).isEqualTo(3L);
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3500);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
-        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+        assumeTrue(result.get().active(), "The account is not active");
+        BankAccountDto bankAccountDto = result.get();
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(3500);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
 
-        verify(dataFacade).saveBankAccount(original);
+        verify(dataFacade).saveBankAccount(originalBankAccount);
         verifyNoMoreInteractions(dataFacade);
     }
 
@@ -141,22 +148,23 @@ public class BankAccountServiceTest {
                 .active(true)
                 .build();
 
+        BankAccountDto updatedBankAccountDto = new BankAccountDto("Theodore", "Roosevelt",
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500), true);
+
         when(dataFacade.findBankAccountById(1L)).thenReturn(Optional.of(original));
         when(dataFacade.updateBankAccount(1L, List.of(Pair.of(BankAccountFields.ACTIVE, "true")))).thenReturn(Optional.of(updated));
+        when(mapper.toDto(updated)).thenReturn(updatedBankAccountDto);
 
-        Optional<BankAccount> result = service.activateAccount(1L);
+        Optional<BankAccountDto> result = service.activateAccount(1L);
 
         assertTrue(result.isPresent());
-        BankAccount bankAccount = result.get();
-        assertThat(bankAccount.getId()).isEqualTo(1L);
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3500);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.isActive()).isTrue();
-        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
-        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+        BankAccountDto bankAccountDto = result.get();
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(3500);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccountDto.active()).isTrue();
+        assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
 
         verify(dataFacade).findBankAccountById(1L);
         verify(dataFacade).updateBankAccount(1L, List.of(Pair.of(BankAccountFields.ACTIVE, "true")));
@@ -195,22 +203,23 @@ public class BankAccountServiceTest {
                 .active(false)
                 .build();
 
+        BankAccountDto updatedBankAccountDto = new BankAccountDto("Theodore", "Roosevelt",
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500), false);
+
         when(dataFacade.findBankAccountById(1L)).thenReturn(Optional.of(original));
         when(dataFacade.updateBankAccount(1L, List.of(Pair.of(BankAccountFields.ACTIVE, "false")))).thenReturn(Optional.of(updated));
+        when(mapper.toDto(updated)).thenReturn(updatedBankAccountDto);
 
-        Optional<BankAccount> result = service.deactivateAccount(1L);
+        Optional<BankAccountDto> result = service.deactivateAccount(1L);
 
         assertTrue(result.isPresent());
-        BankAccount bankAccount = result.get();
-        assertThat(bankAccount.getId()).isEqualTo(1L);
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3500);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.isActive()).isFalse();
-        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
-        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+        BankAccountDto bankAccountDto = result.get();
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(3500);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccountDto.active()).isFalse();
+        assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
 
         verify(dataFacade).findBankAccountById(1L);
         verify(dataFacade).updateBankAccount(1L, List.of(Pair.of(BankAccountFields.ACTIVE, "false")));
@@ -249,21 +258,22 @@ public class BankAccountServiceTest {
                 .active(true)
                 .build();
 
+        BankAccountDto updatedBankAccountDto = new BankAccountDto("Theodore", "Roosevelt",
+                BigDecimal.valueOf(3550), BigDecimal.valueOf(1500), true);
+
         when(dataFacade.findBankAccountById(1L)).thenReturn(Optional.of(original));
         when(dataFacade.updateBankAccount(1L, List.of(Pair.of(BankAccountFields.BALANCE, "3550.0")))).thenReturn(Optional.of(updated));
+        when(mapper.toDto(updated)).thenReturn(updatedBankAccountDto);
 
-        Optional<BankAccount> result = service.makeDeposit(1L, 50);
+        Optional<BankAccountDto> result = service.makeDeposit(1L, 50);
 
         assertTrue(result.isPresent());
-        BankAccount bankAccount = result.get();
-        assertThat(bankAccount.getId()).isEqualTo(1L);
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3550);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
-        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+        BankAccountDto bankAccountDto = result.get();
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(3550);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
 
         verify(dataFacade).findBankAccountById(1L);
         verify(dataFacade).updateBankAccount(1L, List.of(Pair.of(BankAccountFields.BALANCE, "3550.0")));
@@ -321,21 +331,22 @@ public class BankAccountServiceTest {
                 .active(true)
                 .build();
 
+        BankAccountDto updatedBankAccountDto = new BankAccountDto("Theodore", "Roosevelt",
+                BigDecimal.valueOf(1501), BigDecimal.valueOf(1500), true);
+
         when(dataFacade.findBankAccountById(1L)).thenReturn(Optional.of(original));
         when(dataFacade.updateBankAccount(1L, List.of(Pair.of(BankAccountFields.BALANCE, "1501.0")))).thenReturn(Optional.of(updated));
+        when(mapper.toDto(updated)).thenReturn(updatedBankAccountDto);
 
-        Optional<BankAccount> result = service.makeWithdraw(1L, 1999);
+        Optional<BankAccountDto> result = service.makeWithdraw(1L, 1999);
 
         assertTrue(result.isPresent());
-        BankAccount bankAccount = result.get();
-        assertThat(bankAccount.getId()).isEqualTo(1L);
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(1501);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
-        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+        BankAccountDto bankAccountDto = result.get();
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(1501);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
 
         verify(dataFacade).findBankAccountById(1L);
         verify(dataFacade).updateBankAccount(1L, List.of(Pair.of(BankAccountFields.BALANCE, "1501.0")));

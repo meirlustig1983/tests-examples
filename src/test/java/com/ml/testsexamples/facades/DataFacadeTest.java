@@ -34,7 +34,6 @@ public class DataFacadeTest {
     public void findAllBankAccounts() {
 
         BankAccount.BankAccountBuilder builder = BankAccount.builder();
-
         BankAccount bankAccount1 = builder
                 .id(1L)
                 .firstName("Theodore")
@@ -152,7 +151,6 @@ public class DataFacadeTest {
     public void updateBankAccount() {
 
         BankAccount.BankAccountBuilder builder = BankAccount.builder();
-
         BankAccount bankAccount = builder
                 .id(1L)
                 .firstName("Theodore")
@@ -202,7 +200,6 @@ public class DataFacadeTest {
     public void updateBankAccount_TryToUpdateUnauthorizedField_IllegalArgumentException() {
 
         BankAccount.BankAccountBuilder builder = BankAccount.builder();
-
         BankAccount originalDto = builder
                 .id(1L)
                 .firstName("Theodore")

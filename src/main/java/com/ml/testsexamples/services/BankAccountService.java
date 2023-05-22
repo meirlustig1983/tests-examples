@@ -1,10 +1,12 @@
 package com.ml.testsexamples.services;
 
 import com.ml.testsexamples.dao.BankAccount;
+import com.ml.testsexamples.dto.BankAccountDto;
 import com.ml.testsexamples.enums.BankAccountFields;
 import com.ml.testsexamples.exceptions.InactiveAccountException;
 import com.ml.testsexamples.exceptions.InsufficientFundsException;
 import com.ml.testsexamples.facades.DataFacade;
+import com.ml.testsexamples.mappers.BankAccountMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,18 +23,20 @@ public class BankAccountService {
 
     private final DataFacade dataFacade;
 
-    public Optional<BankAccount> getAccountInfo(Long id) {
+    private final BankAccountMapper mapper;
+
+    public Optional<BankAccountDto> getAccountInfo(Long id) {
         log.info("BankAccountService.getAccountInfo(id) - get info about bank account. id: {}", id);
         Optional<BankAccount> bankAccount = dataFacade.findBankAccountById(id);
         if (bankAccount.isEmpty()) {
             throw new EntityNotFoundException("Invalid bank account");
         }
-        return bankAccount;
+        return bankAccount.map(mapper::toDto);
     }
 
-    public Optional<BankAccount> createAccount(BankAccount bankAccount) {
+    public Optional<BankAccountDto> createAccount(BankAccountDto bankAccountDto) {
         log.info("BankAccountService.createAccount(bankAccount) - create bank account");
-        return dataFacade.saveBankAccount(bankAccount);
+        return dataFacade.saveBankAccount(mapper.toDao(bankAccountDto)).map(mapper::toDto);
     }
 
     public void deleteBankAccountById(Long id) {
@@ -40,25 +44,25 @@ public class BankAccountService {
         dataFacade.deleteBankAccountById(id);
     }
 
-    public Optional<BankAccount> activateAccount(Long id) {
+    public Optional<BankAccountDto> activateAccount(Long id) {
         log.info("BankAccountService.activateAccount(id) - make a bank account active. id: {}", id);
         Optional<BankAccount> original = dataFacade.findBankAccountById(id);
         if (original.isEmpty()) {
             throw new EntityNotFoundException("Invalid bank account");
         }
-        return dataFacade.updateBankAccount(id, List.of(Pair.of(BankAccountFields.ACTIVE, "true")));
+        return dataFacade.updateBankAccount(id, List.of(Pair.of(BankAccountFields.ACTIVE, "true"))).map(mapper::toDto);
     }
 
-    public Optional<BankAccount> deactivateAccount(Long id) {
+    public Optional<BankAccountDto> deactivateAccount(Long id) {
         log.info("BankAccountService.deactivateAccount(id) - make a bank account inactive. id: {}", id);
         Optional<BankAccount> original = dataFacade.findBankAccountById(id);
         if (original.isEmpty()) {
             throw new EntityNotFoundException("Invalid bank account");
         }
-        return dataFacade.updateBankAccount(id, List.of(Pair.of(BankAccountFields.ACTIVE, "false")));
+        return dataFacade.updateBankAccount(id, List.of(Pair.of(BankAccountFields.ACTIVE, "false"))).map(mapper::toDto);
     }
 
-    public Optional<BankAccount> makeDeposit(Long id, double amount) {
+    public Optional<BankAccountDto> makeDeposit(Long id, double amount) {
         log.info("BankAccountService.makeDeposit(id,amount) - make a deposit to bank account. id: {}, amount: {}", id, amount);
         Optional<BankAccount> original = dataFacade.findBankAccountById(id);
         if (original.isEmpty()) {
@@ -66,10 +70,11 @@ public class BankAccountService {
         } else if (!original.get().isActive()) {
             throw new InactiveAccountException("Inactive bank account");
         }
-        return dataFacade.updateBankAccount(id, List.of(Pair.of(BankAccountFields.BALANCE, Double.toString(original.get().getBalance().doubleValue() + amount))));
+        return dataFacade.updateBankAccount(id, List.of(Pair.of(BankAccountFields.BALANCE,
+                Double.toString(original.get().getBalance().doubleValue() + amount)))).map(mapper::toDto);
     }
 
-    public Optional<BankAccount> makeWithdraw(Long id, double amount) {
+    public Optional<BankAccountDto> makeWithdraw(Long id, double amount) {
         log.info("BankAccountService.makeWithdraw(id, amount) - make a withdraw for bank account. id: {}, amount: {}", id, amount);
         Optional<BankAccount> original = dataFacade.findBankAccountById(id);
         if (original.isEmpty()) {
@@ -79,6 +84,7 @@ public class BankAccountService {
         } else if (original.get().getBalance().doubleValue() - amount < original.get().getMinimumBalance().doubleValue()) {
             throw new InsufficientFundsException("Insufficient funds exception");
         }
-        return dataFacade.updateBankAccount(id, List.of(Pair.of(BankAccountFields.BALANCE, Double.toString(original.get().getBalance().doubleValue() - amount))));
+        return dataFacade.updateBankAccount(id, List.of(Pair.of(BankAccountFields.BALANCE,
+                Double.toString(original.get().getBalance().doubleValue() - amount)))).map(mapper::toDto);
     }
 }

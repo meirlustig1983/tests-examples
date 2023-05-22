@@ -1,6 +1,6 @@
 package com.ml.testsexamples.services;
 
-import com.ml.testsexamples.dao.BankAccount;
+import com.ml.testsexamples.dto.BankAccountDto;
 import com.ml.testsexamples.exceptions.InsufficientFundsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -17,7 +17,6 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -40,19 +39,16 @@ public class BankAccountServiceIT {
     @EnabledOnJre({JRE.JAVA_17})
     public void getAccountInfo_EnabledOnOsMAC_EnabledOnJre17() {
 
-        Optional<BankAccount> result = service.getAccountInfo(1L);
+        Optional<BankAccountDto> result = service.getAccountInfo(1L);
 
         assertTrue(result.isPresent());
-        BankAccount bankAccount = result.get();
+        BankAccountDto bankAccountDto = result.get();
 
-        assumingThat(bankAccount.isActive(), () -> assertThat(bankAccount.getId()).isEqualTo(1L));
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3500);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
-        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+        assumingThat(bankAccountDto.active(), () -> assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance()));
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(3500);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
     }
 
     @Test
@@ -61,18 +57,15 @@ public class BankAccountServiceIT {
     @EnabledOnOs({OS.LINUX})
     public void getAccountInfo_EnabledOnOsLINUX() {
 
-        Optional<BankAccount> result = service.getAccountInfo(1L);
+        Optional<BankAccountDto> result = service.getAccountInfo(1L);
         assertTrue(result.isPresent());
-        BankAccount bankAccount = result.get();
+        BankAccountDto bankAccountDto = result.get();
 
-        assumingThat(bankAccount.isActive(), () -> assertThat(bankAccount.getId()).isEqualTo(1L));
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3500);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
-        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+        assumingThat(bankAccountDto.active(), () -> assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance()));
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(3500);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
     }
 
     @Test
@@ -80,29 +73,20 @@ public class BankAccountServiceIT {
     @Sql(scripts = "/data/recreate-datasets-0.sql")
     public void createAccount() {
 
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount newBankAccount = builder
-                .firstName("Meir")
-                .lastName("Lustig")
-                .balance(BigDecimal.valueOf(1_000_000))
-                .minimumBalance(BigDecimal.valueOf(1_500))
-                .active(true)
-                .build();
+        BankAccountDto newBankAccountDto = new BankAccountDto("Meir", "Lustig",
+                BigDecimal.valueOf(1_000_000), BigDecimal.valueOf(1_500), true);
 
-        Optional<BankAccount> result3 = service.createAccount(newBankAccount);
+        Optional<BankAccountDto> result = service.createAccount(newBankAccountDto);
 
-        assertTrue(result3.isPresent());
-        BankAccount bankAccount3 = result3.get();
+        assertTrue(result.isPresent());
+        BankAccountDto bankAccountDto = result.get();
 
-        assertThat(bankAccount3.getId()).isGreaterThanOrEqualTo(1);
-        assertThat(bankAccount3.getFirstName()).isEqualTo("Meir");
-        assertThat(bankAccount3.getLastName()).isEqualTo("Lustig");
-        assertThat(bankAccount3.getBalance().intValue()).isEqualTo(1_000_000);
-        assertThat(bankAccount3.getMinimumBalance().intValue()).isEqualTo(1_500);
-        assertThat(bankAccount3.isActive()).isTrue();
-        assertThat(bankAccount3.getBalance()).isGreaterThan(bankAccount3.getMinimumBalance());
-        assertThat(bankAccount3.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount3.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+        assertThat(bankAccountDto.firstName()).isEqualTo("Meir");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Lustig");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(1_000_000);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1_500);
+        assertThat(bankAccountDto.active()).isTrue();
+        assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
 
         service.deleteBankAccountById(1L);
 
@@ -113,19 +97,19 @@ public class BankAccountServiceIT {
     @DisplayName("Test activate bank account. BankAccount[id = 2]")
     public void activateAccount() {
 
-        Optional<BankAccount> result = service.getAccountInfo(2L);
+        Optional<BankAccountDto> result = service.getAccountInfo(2L);
 
         assertThat(result.isPresent()).isTrue();
 
-        BankAccount bankAccount = result.get();
-        assertThat(bankAccount.isActive()).isFalse();
+        BankAccountDto bankAccountDto = result.get();
+        assertThat(bankAccountDto.active()).isFalse();
 
         result = service.activateAccount(2L);
 
         assertThat(result.isPresent()).isTrue();
 
-        bankAccount = result.get();
-        assertThat(bankAccount.isActive()).isTrue();
+        bankAccountDto = result.get();
+        assertThat(bankAccountDto.active()).isTrue();
     }
 
     @Test
@@ -138,19 +122,19 @@ public class BankAccountServiceIT {
     @DisplayName("Test deactivate bank account. BankAccount[id = 1]")
     public void deactivateAccount() {
 
-        Optional<BankAccount> result = service.getAccountInfo(1L);
+        Optional<BankAccountDto> result = service.getAccountInfo(1L);
 
         assertThat(result.isPresent()).isTrue();
 
-        BankAccount bankAccount = result.get();
-        assertThat(bankAccount.isActive()).isTrue();
+        BankAccountDto bankAccountDto = result.get();
+        assertThat(bankAccountDto.active()).isTrue();
 
         result = service.deactivateAccount(1L);
 
         assertThat(result.isPresent()).isTrue();
 
-        bankAccount = result.get();
-        assertThat(bankAccount.isActive()).isFalse();
+        bankAccountDto = result.get();
+        assertThat(bankAccountDto.active()).isFalse();
     }
 
     @Test
@@ -163,18 +147,15 @@ public class BankAccountServiceIT {
     @DisplayName("Test deposit to a bank account. BankAccount[id = 1]")
     public void makeDeposit() {
 
-        Optional<BankAccount> result = service.makeDeposit(1L, 50);
+        Optional<BankAccountDto> result = service.makeDeposit(1L, 50);
 
         assertTrue(result.isPresent());
-        BankAccount bankAccount = result.get();
-        assertThat(bankAccount.getId()).isEqualTo(1L);
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3550);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
-        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+        BankAccountDto bankAccountDto = result.get();
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(3550);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
     }
 
     @Test
@@ -193,18 +174,15 @@ public class BankAccountServiceIT {
     @DisplayName("Test withdraw from a bank account. BankAccount[id = 1]")
     public void makeWithdraw() {
 
-        Optional<BankAccount> result = service.makeWithdraw(1L, 1999);
+        Optional<BankAccountDto> result = service.makeWithdraw(1L, 1999);
 
         assertTrue(result.isPresent());
-        BankAccount bankAccount = result.get();
-        assertThat(bankAccount.getId()).isEqualTo(1L);
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(1501);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
-        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+        BankAccountDto bankAccountDto = result.get();
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(1501);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
     }
 
     @Test
@@ -217,39 +195,25 @@ public class BankAccountServiceIT {
     @DisplayName("Test withdraw from a bank account until it run-out of the money. BankAccount[id = 1]")
     public void makeWithdraw_BelowMinimum() {
 
-        Optional<BankAccount> result = service.makeWithdraw(1L, 1000);
+        Optional<BankAccountDto> result = service.makeWithdraw(1L, 1000);
 
         assertTrue(result.isPresent());
-        BankAccount bankAccount = result.get();
-        assertThat(bankAccount.getId()).isEqualTo(1L);
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(2500);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
-
-        LocalDateTime createdAt = result.get().getCreatedAt();
-        LocalDateTime updatedAt = result.get().getUpdatedAt();
-
-        assertInstanceOf(LocalDateTime.class, createdAt);
-        assertInstanceOf(LocalDateTime.class, updatedAt);
+        BankAccountDto bankAccountDto = result.get();
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(2500);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
 
         result = service.makeWithdraw(1L, 1000);
 
         assertTrue(result.isPresent());
-        bankAccount = result.get();
-        assertThat(bankAccount.getId()).isEqualTo(1L);
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.getBalance().doubleValue()).isEqualTo(bankAccount.getMinimumBalance().doubleValue());
-        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
-
-        assertThat(result.get().getCreatedAt()).isEqualTo(createdAt);
-        assertThat(result.get().getUpdatedAt()).isNotEqualTo(createdAt);
-        assertThat(result.get().getUpdatedAt()).isNotEqualTo(updatedAt);
+        bankAccountDto = result.get();
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(1500);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccountDto.balance().doubleValue()).isEqualTo(bankAccountDto.minimumBalance().doubleValue());
 
         assertThrows(InsufficientFundsException.class, () -> service.makeWithdraw(1L, 1000));
     }
@@ -274,17 +238,14 @@ public class BankAccountServiceIT {
                 () -> service.makeWithdraw(1L, 100), () -> service.makeDeposit(1L, 1000),
                 () -> service.makeWithdraw(1L, 100), () -> service.makeWithdraw(1L, 100));
 
-        Optional<BankAccount> result = service.makeWithdraw(1L, 1);
+        Optional<BankAccountDto> result = service.makeWithdraw(1L, 1);
 
         assertTrue(result.isPresent());
-        BankAccount bankAccount = result.get();
-        assertThat(bankAccount.getId()).isEqualTo(1L);
-        assertThat(bankAccount.getFirstName()).isEqualTo("Theodore");
-        assertThat(bankAccount.getLastName()).isEqualTo("Roosevelt");
-        assertThat(bankAccount.getBalance().intValue()).isEqualTo(3999);
-        assertThat(bankAccount.getMinimumBalance().intValue()).isEqualTo(1500);
-        assertThat(bankAccount.getBalance()).isGreaterThan(bankAccount.getMinimumBalance());
-        assertThat(bankAccount.getCreatedAt()).isInstanceOf(LocalDateTime.class);
-        assertThat(bankAccount.getUpdatedAt()).isInstanceOf(LocalDateTime.class);
+        BankAccountDto bankAccountDto = result.get();
+        assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
+        assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
+        assertThat(bankAccountDto.balance().intValue()).isEqualTo(3999);
+        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
+        assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
     }
 }

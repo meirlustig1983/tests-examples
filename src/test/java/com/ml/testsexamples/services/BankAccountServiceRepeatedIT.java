@@ -1,6 +1,6 @@
 package com.ml.testsexamples.services;
 
-import com.ml.testsexamples.dao.BankAccount;
+import com.ml.testsexamples.dto.BankAccountDto;
 import com.ml.testsexamples.exceptions.InsufficientFundsException;
 import com.ml.testsexamples.utils.CustomDisplayNameGenerator;
 import org.junit.jupiter.api.*;
@@ -26,26 +26,26 @@ public class BankAccountServiceRepeatedIT {
     @Order(1)
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:/data/recreate-datasets-2.sql")
     public void getAccountInfo() {
-        Optional<BankAccount> bankAccount = service.getAccountInfo(1L);
-        assertTrue(bankAccount.isPresent());
-        assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
-        assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
-        assertThat(bankAccount.get().getBalance().doubleValue()).isEqualTo(2000);
-        assertThat(bankAccount.get().getMinimumBalance().doubleValue()).isEqualTo(500);
-        assertThat(bankAccount.get().isActive()).isEqualTo(true);
+        Optional<BankAccountDto> result = service.getAccountInfo(1L);
+        assertTrue(result.isPresent());
+        assertThat(result.get().firstName()).isEqualTo("John");
+        assertThat(result.get().lastName()).isEqualTo("Doe");
+        assertThat(result.get().balance().doubleValue()).isEqualTo(2000);
+        assertThat(result.get().minimumBalance().doubleValue()).isEqualTo(500);
+        assertThat(result.get().active()).isEqualTo(true);
     }
 
     @Order(2)
     @RepeatedTest(3)
     public void makeWithdraw() {
-        Optional<BankAccount> bankAccount = service.makeWithdraw(1L, 500);
-        assertTrue(bankAccount.isPresent());
-        assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
-        assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
-        assertThat(bankAccount.get().getBalance().doubleValue()).isGreaterThanOrEqualTo(500);
-        assertThat(bankAccount.get().getBalance().doubleValue()).isLessThan(2000);
-        assertThat(bankAccount.get().getMinimumBalance().doubleValue()).isEqualTo(500);
-        assertThat(bankAccount.get().isActive()).isEqualTo(true);
+        Optional<BankAccountDto> result = service.makeWithdraw(1L, 500);
+        assertTrue(result.isPresent());
+        assertThat(result.get().firstName()).isEqualTo("John");
+        assertThat(result.get().lastName()).isEqualTo("Doe");
+        assertThat(result.get().balance().doubleValue()).isGreaterThanOrEqualTo(500);
+        assertThat(result.get().balance().doubleValue()).isLessThan(2000);
+        assertThat(result.get().minimumBalance().doubleValue()).isEqualTo(500);
+        assertThat(result.get().active()).isEqualTo(true);
     }
 
     @Test
