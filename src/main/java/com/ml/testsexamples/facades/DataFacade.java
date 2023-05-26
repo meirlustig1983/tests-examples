@@ -1,8 +1,12 @@
 package com.ml.testsexamples.facades;
 
 import com.ml.testsexamples.dao.BankAccount;
+import com.ml.testsexamples.dao.Transaction;
 import com.ml.testsexamples.enums.BankAccountFields;
+import com.ml.testsexamples.enums.TransactionType;
 import com.ml.testsexamples.repositories.BankAccountRepository;
+import com.ml.testsexamples.repositories.TransactionRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.util.Pair;
@@ -15,34 +19,47 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@Transactional
 public class DataFacade {
 
     private final BankAccountRepository bankAccountRepository;
+
+    private final TransactionRepository transactionRepository;
 
     public List<BankAccount> findAllBankAccounts() {
         log.info("DataFacade.findAllBankAccounts() - retrieving all bank accounts data.");
         return bankAccountRepository.findAll();
     }
 
-    public Optional<BankAccount> findBankAccountById(Long id) {
-        log.info("DataFacade.findBankAccountById(id) - retrieving bank account data by id. id: {}", id);
-        return bankAccountRepository.findById(id);
+    public Optional<BankAccount> findBankAccountByAccountId(String accountId) {
+        log.info("DataFacade.findBankAccountByAccountId(accountId) - retrieving bank account data by accountId. accountId: {}", accountId);
+        return bankAccountRepository.findBankAccountByAccountId(accountId);
     }
 
     public Optional<BankAccount> saveBankAccount(BankAccount bankAccount) {
-        log.info("DataFacade.saveBankAccount(bankAccount) - save bank account. id: {}", bankAccount.getId());
+        log.info("DataFacade.saveBankAccount(bankAccount) - save bank account. accountId: {}", bankAccount.getAccountId());
         return Optional.of(bankAccountRepository.save(bankAccount));
     }
 
-    public Optional<BankAccount> updateBankAccount(Long id, List<Pair<BankAccountFields, String>> data) {
-        log.info("DataFacade.updateBankAccount(id, data) - update bank account data by id an list of pairs. id: {}, data: {}", id, data);
-        Optional<BankAccount> original = bankAccountRepository.findById(id);
+    public void saveTransaction(Long bankAccountId, BigDecimal amount, TransactionType type) {
+        log.info("DataFacade.saveTransaction(bankAccountId, amount, type) - save transaction. bankAccountId: {}, amount: {}, type: {}", bankAccountId, amount, type);
+        Transaction.TransactionBuilder builder = Transaction.builder();
+        transactionRepository.save(builder.bankAccountId(bankAccountId)
+                .amount(amount)
+                .type(type)
+                .build());
+    }
+
+    public Optional<BankAccount> updateBankAccount(String accountId, List<Pair<BankAccountFields, String>> data) {
+        log.info("DataFacade.updateBankAccount(accountId, data) - update bank account data by accountId an list of pairs. accountId: {}, data: {}", accountId, data);
+        Optional<BankAccount> original = bankAccountRepository.findBankAccountByAccountId(accountId);
         if (original.isEmpty()) {
             return Optional.empty();
         } else {
             BankAccount.BankAccountBuilder builder = BankAccount.builder();
             BankAccount updated = builder
                     .id(original.get().getId())
+                    .accountId(original.get().getAccountId())
                     .firstName(original.get().getFirstName())
                     .lastName(original.get().getLastName())
                     .balance(original.get().getBalance())
@@ -66,8 +83,8 @@ public class DataFacade {
         }
     }
 
-    public void deleteBankAccountById(Long id) {
-        log.info("DataFacade.deleteBankAccountById(id) - delete bank account by id. id: {}", id);
-        bankAccountRepository.deleteById(id);
+    public void deleteBankAccountByAccountId(String accountId) {
+        log.info("DataFacade.deleteBankAccountByAccountId(accountId) - delete bank account by accountId accountId: {}", accountId);
+        bankAccountRepository.deleteByAccountId(accountId);
     }
 }

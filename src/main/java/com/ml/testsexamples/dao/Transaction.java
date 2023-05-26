@@ -1,7 +1,8 @@
 package com.ml.testsexamples.dao;
 
-import lombok.*;
+import com.ml.testsexamples.enums.TransactionType;
 import jakarta.persistence.*;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
@@ -14,45 +15,35 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "bank_account")
-public class BankAccount {
+@Table(name = "transaction")
+public class Transaction {
 
     @Id
     @SequenceGenerator(
-            name = "bank_account_id_sequence",
-            sequenceName = "bank_account_id_sequence",
+            name = "transaction_id_sequence",
+            sequenceName = "transaction_id_sequence",
             allocationSize = 1
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "bank_account_id_sequence"
+            generator = "transaction_id_sequence"
     )
     @EqualsAndHashCode.Exclude
     private Long id;
 
     @NonNull
-    @Column(nullable = false, unique = true)
-    private String accountId;
+    @Column(nullable = false)
+    private Long bankAccountId;
 
     @NonNull
     @Column(nullable = false)
-    private String firstName;
+    private BigDecimal amount;
 
     @NonNull
     @Column(nullable = false)
-    private String lastName;
-
-    private BigDecimal balance;
-
-    private BigDecimal minimumBalance;
-
-    private boolean active;
+    private TransactionType type;
 
     @Builder.Default
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now(Clock.systemDefaultZone());
-
-    @Builder.Default
-    @Column(nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now(Clock.systemDefaultZone());
 }

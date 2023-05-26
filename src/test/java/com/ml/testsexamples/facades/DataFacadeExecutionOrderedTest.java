@@ -20,6 +20,7 @@ public class DataFacadeExecutionOrderedTest {
         BankAccount.BankAccountBuilder builder = BankAccount.builder();
         bankAccount = builder
                 .id(1L)
+                .accountId("meir.lustig@gmail.com")
                 .firstName("Meir")
                 .lastName("Lustig")
                 .balance(BigDecimal.valueOf(5000))
@@ -28,6 +29,7 @@ public class DataFacadeExecutionOrderedTest {
                 .build();
 
         assertThat(bankAccount.getId()).isGreaterThanOrEqualTo(1L);
+        assertThat(bankAccount.getAccountId()).isEqualTo("meir.lustig@gmail.com");
         assertThat(bankAccount.getFirstName()).isEqualTo("Meir");
         assertThat(bankAccount.getLastName()).isEqualTo("Lustig");
         assertThat(bankAccount.getBalance().doubleValue()).isEqualTo(5000);
@@ -45,6 +47,7 @@ public class DataFacadeExecutionOrderedTest {
         bankAccount.setBalance(BigDecimal.valueOf(6000));
 
         assertThat(bankAccount.getId()).isEqualTo(1L);
+        assertThat(bankAccount.getAccountId()).isEqualTo("meir.lustig@gmail.com");
         assertThat(bankAccount.getFirstName()).isEqualTo("Meir");
         assertThat(bankAccount.getLastName()).isEqualTo("Lustig");
         assertThat(bankAccount.getBalance().doubleValue()).isEqualTo(6000);
@@ -62,6 +65,7 @@ public class DataFacadeExecutionOrderedTest {
         bankAccount.setMinimumBalance(BigDecimal.valueOf(-1000));
 
         assertThat(bankAccount.getId()).isEqualTo(1L);
+        assertThat(bankAccount.getAccountId()).isEqualTo("meir.lustig@gmail.com");
         assertThat(bankAccount.getFirstName()).isEqualTo("Meir");
         assertThat(bankAccount.getLastName()).isEqualTo("Lustig");
         assertThat(bankAccount.getBalance().doubleValue()).isEqualTo(6000);

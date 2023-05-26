@@ -18,6 +18,7 @@ public class BankAccountParameterResolver implements ParameterResolver {
         BankAccount.BankAccountBuilder builder = BankAccount.builder();
         return builder
                 .id(1L)
+                .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
                 .lastName("Roosevelt")
                 .balance(BigDecimal.valueOf(3500))

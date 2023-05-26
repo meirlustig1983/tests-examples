@@ -36,6 +36,7 @@ public class DataFacadeTest {
         BankAccount.BankAccountBuilder builder = BankAccount.builder();
         BankAccount bankAccount1 = builder
                 .id(1L)
+                .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
                 .lastName("Roosevelt")
                 .balance(BigDecimal.valueOf(3500))
@@ -44,6 +45,7 @@ public class DataFacadeTest {
 
         BankAccount bankAccount2 = builder
                 .id(2L)
+                .accountId("franklin.benjamin@gmail.com")
                 .firstName("Franklin")
                 .lastName("Benjamin")
                 .balance(BigDecimal.valueOf(0))
@@ -58,6 +60,7 @@ public class DataFacadeTest {
         assertEquals(2, result.size());
 
         assertEquals(1L, result.get(0).getId());
+        assertEquals("theodore.roosevelt@gmail.com", result.get(0).getAccountId());
         assertEquals("Theodore", result.get(0).getFirstName());
         assertEquals("Roosevelt", result.get(0).getLastName());
         assertEquals(3500, result.get(0).getBalance().intValue());
@@ -66,6 +69,7 @@ public class DataFacadeTest {
         assertInstanceOf(LocalDateTime.class, result.get(0).getUpdatedAt());
 
         assertEquals(2L, result.get(1).getId());
+        assertEquals("franklin.benjamin@gmail.com", result.get(1).getAccountId());
         assertEquals("Franklin", result.get(1).getFirstName());
         assertEquals("Benjamin", result.get(1).getLastName());
         assertEquals(0, result.get(1).getBalance().intValue());
@@ -78,23 +82,26 @@ public class DataFacadeTest {
     }
 
     @Test
-    public void findBankAccountById() {
+    public void findBankAccountByAccountId() {
 
         BankAccount.BankAccountBuilder builder = BankAccount.builder();
         BankAccount bankAccount = builder
                 .id(1L)
+                .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
                 .lastName("Roosevelt")
                 .balance(BigDecimal.valueOf(3500))
                 .minimumBalance(BigDecimal.valueOf(1500))
                 .build();
 
-        when(repository.findById(1L)).thenReturn(Optional.of(bankAccount));
+        when(repository.findBankAccountByAccountId("theodore.roosevelt@gmail.com"))
+                .thenReturn(Optional.of(bankAccount));
 
-        Optional<BankAccount> result = dataFacade.findBankAccountById(1L);
+        Optional<BankAccount> result = dataFacade.findBankAccountByAccountId("theodore.roosevelt@gmail.com");
 
         assertTrue(result.isPresent());
         assertEquals(1L, result.get().getId());
+        assertEquals("theodore.roosevelt@gmail.com", result.get().getAccountId());
         assertEquals("Theodore", result.get().getFirstName());
         assertEquals("Roosevelt", result.get().getLastName());
         assertEquals(3500, result.get().getBalance().intValue());
@@ -102,19 +109,19 @@ public class DataFacadeTest {
         assertInstanceOf(LocalDateTime.class, result.get().getCreatedAt());
         assertInstanceOf(LocalDateTime.class, result.get().getUpdatedAt());
 
-        verify(repository).findById(1L);
+        verify(repository).findBankAccountByAccountId("theodore.roosevelt@gmail.com");
         verifyNoMoreInteractions(repository);
     }
 
     @Test
-    public void findBankAccountById_FindBankAccountForNotExistsAccountId_EmptyOptional() {
-        when(repository.findById(1L)).thenReturn(Optional.empty());
+    public void findBankAccountByAccountId_FindBankAccountForNotExistsAccountId_EmptyOptional() {
+        when(repository.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.empty());
 
-        Optional<BankAccount> result = dataFacade.findBankAccountById(1L);
+        Optional<BankAccount> result = dataFacade.findBankAccountByAccountId("theodore.roosevelt@gmail.com");
 
         assertFalse(result.isPresent());
 
-        verify(repository).findById(1L);
+        verify(repository).findBankAccountByAccountId("theodore.roosevelt@gmail.com");
         verifyNoMoreInteractions(repository);
     }
 
@@ -124,6 +131,7 @@ public class DataFacadeTest {
         BankAccount.BankAccountBuilder builder = BankAccount.builder();
         BankAccount bankAccount = builder
                 .id(1L)
+                .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
                 .lastName("Roosevelt")
                 .balance(BigDecimal.valueOf(3500))
@@ -136,6 +144,7 @@ public class DataFacadeTest {
 
         assertTrue(result.isPresent());
         assertEquals(1L, result.get().getId());
+        assertEquals("theodore.roosevelt@gmail.com", result.get().getAccountId());
         assertEquals("Theodore", result.get().getFirstName());
         assertEquals("Roosevelt", result.get().getLastName());
         assertEquals(3500, result.get().getBalance().intValue());
@@ -153,6 +162,7 @@ public class DataFacadeTest {
         BankAccount.BankAccountBuilder builder = BankAccount.builder();
         BankAccount bankAccount = builder
                 .id(1L)
+                .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
                 .lastName("Roosevelt")
                 .balance(BigDecimal.valueOf(3500))
@@ -161,21 +171,24 @@ public class DataFacadeTest {
 
         BankAccount updatedBankAccount = builder
                 .id(1L)
+                .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Meir")
                 .lastName("Roth")
                 .balance(BigDecimal.valueOf(10000))
                 .minimumBalance(BigDecimal.valueOf(0))
                 .build();
 
-        when(repository.findById(1L)).thenReturn(Optional.of(bankAccount));
+        when(repository.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.of(bankAccount));
         when(repository.save(any(BankAccount.class))).thenReturn(updatedBankAccount);
 
-        Optional<BankAccount> result = dataFacade.updateBankAccount(1L, List.of(Pair.of(BankAccountFields.FIRST_NAME, "Meir"),
-                Pair.of(BankAccountFields.LAST_NAME, "Roth"), Pair.of(BankAccountFields.BALANCE, "10000"),
-                Pair.of(BankAccountFields.MINIMUM_BALANCE, "0")));
+        Optional<BankAccount> result = dataFacade.updateBankAccount("theodore.roosevelt@gmail.com",
+                List.of(Pair.of(BankAccountFields.FIRST_NAME, "Meir"),
+                        Pair.of(BankAccountFields.LAST_NAME, "Roth"), Pair.of(BankAccountFields.BALANCE, "10000"),
+                        Pair.of(BankAccountFields.MINIMUM_BALANCE, "0")));
 
         assertTrue(result.isPresent());
         assertEquals(1L, result.get().getId());
+        assertEquals("theodore.roosevelt@gmail.com", result.get().getAccountId());
         assertEquals("Meir", result.get().getFirstName());
         assertEquals("Roth", result.get().getLastName());
         assertEquals(10000, result.get().getBalance().intValue());
@@ -183,16 +196,16 @@ public class DataFacadeTest {
         assertInstanceOf(LocalDateTime.class, result.get().getCreatedAt());
         assertInstanceOf(LocalDateTime.class, result.get().getUpdatedAt());
 
-        verify(repository).findById(1L);
+        verify(repository).findBankAccountByAccountId("theodore.roosevelt@gmail.com");
         verify(repository).save(any(BankAccount.class));
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     public void updateBankAccount_TryToUpdateBalanceFieldForNotExistsBankAccount_EmptyOptional() {
-        when(repository.findById(3L)).thenReturn(Optional.empty());
+        when(repository.findBankAccountByAccountId("fake@gmail.com")).thenReturn(Optional.empty());
 
-        Optional<BankAccount> result = dataFacade.updateBankAccount(3L, List.of(Pair.of(BankAccountFields.BALANCE, "1000"), Pair.of(BankAccountFields.BALANCE, "15000")));
+        Optional<BankAccount> result = dataFacade.updateBankAccount("fake@gmail.com", List.of(Pair.of(BankAccountFields.BALANCE, "1000"), Pair.of(BankAccountFields.BALANCE, "15000")));
         assertFalse(result.isPresent());
     }
 
@@ -202,24 +215,26 @@ public class DataFacadeTest {
         BankAccount.BankAccountBuilder builder = BankAccount.builder();
         BankAccount originalDto = builder
                 .id(1L)
+                .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
                 .lastName("Roosevelt")
                 .balance(BigDecimal.valueOf(3500))
                 .minimumBalance(BigDecimal.valueOf(1500))
                 .build();
 
-        when(repository.findById(1L)).thenReturn(Optional.of(originalDto));
+        when(repository.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.of(originalDto));
 
-        assertThrows(IllegalArgumentException.class, () -> dataFacade.updateBankAccount(1L, List.of(Pair.of(BankAccountFields.ID, "1000"), Pair.of(BankAccountFields.BALANCE, "8500"))));
+        assertThrows(IllegalArgumentException.class, () -> dataFacade.updateBankAccount("theodore.roosevelt@gmail.com",
+                List.of(Pair.of(BankAccountFields.ID, "1000"), Pair.of(BankAccountFields.BALANCE, "8500"))));
 
-        verify(repository).findById(1L);
+        verify(repository).findBankAccountByAccountId("theodore.roosevelt@gmail.com");
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     public void deleteBankAccountById() {
-        dataFacade.deleteBankAccountById(1L);
-        verify(repository).deleteById(1L);
+        dataFacade.deleteBankAccountByAccountId("theodore.roosevelt@gmail.com");
+        verify(repository).deleteByAccountId("theodore.roosevelt@gmail.com");
         verifyNoMoreInteractions(repository);
     }
 }

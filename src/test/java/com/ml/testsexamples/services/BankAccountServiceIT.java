@@ -33,18 +33,19 @@ public class BankAccountServiceIT {
     private BankAccountService service;
 
     @Test
-    @DisplayName("Test get info about bank account, if (OS is MAC) & (JRE is JAVA_17). BankAccount[id = 1]")
+    @DisplayName("Test get info about bank account, if (OS is MAC) & (JRE is JAVA_17)")
     @Timeout(value = 3000, unit = TimeUnit.MICROSECONDS)
     @EnabledOnOs({OS.MAC})
     @EnabledOnJre({JRE.JAVA_17})
     public void getAccountInfo_EnabledOnOsMAC_EnabledOnJre17() {
 
-        Optional<BankAccountDto> result = service.getAccountInfo(1L);
+        Optional<BankAccountDto> result = service.getAccountInfo("theodore.roosevelt@gmail.com");
 
         assertTrue(result.isPresent());
         BankAccountDto bankAccountDto = result.get();
 
         assumingThat(bankAccountDto.active(), () -> assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance()));
+        assertThat(bankAccountDto.accountId()).isEqualTo("theodore.roosevelt@gmail.com");
         assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
         assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
         assertThat(bankAccountDto.balance().intValue()).isEqualTo(3500);
@@ -52,16 +53,17 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    @DisplayName("Test get info about bank account, if (OS is LINUX). BankAccount[id = 1]")
+    @DisplayName("Test get info about bank account, if (OS is LINUX)")
     @Timeout(value = 10000, unit = TimeUnit.MICROSECONDS)
     @EnabledOnOs({OS.LINUX})
     public void getAccountInfo_EnabledOnOsLINUX() {
 
-        Optional<BankAccountDto> result = service.getAccountInfo(1L);
+        Optional<BankAccountDto> result = service.getAccountInfo("theodore.roosevelt@gmail.com");
         assertTrue(result.isPresent());
         BankAccountDto bankAccountDto = result.get();
 
         assumingThat(bankAccountDto.active(), () -> assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance()));
+        assertThat(bankAccountDto.accountId()).isEqualTo("theodore.roosevelt@gmail.com");
         assertThat(bankAccountDto.firstName()).isEqualTo("Theodore");
         assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
         assertThat(bankAccountDto.balance().intValue()).isEqualTo(3500);
@@ -69,11 +71,12 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    @DisplayName("Test create and delete bank account. BankAccount[id = 1]")
+    @DisplayName("Test create and delete bank account.")
     @Sql(scripts = "/data/recreate-datasets-0.sql")
     public void createAccount() {
 
-        BankAccountDto newBankAccountDto = new BankAccountDto("Meir", "Lustig",
+        BankAccountDto newBankAccountDto = new BankAccountDto("meir.lustig@gmail.com",
+                "Meir", "Lustig",
                 BigDecimal.valueOf(1_000_000), BigDecimal.valueOf(1_500), true);
 
         Optional<BankAccountDto> result = service.createAccount(newBankAccountDto);
@@ -81,6 +84,7 @@ public class BankAccountServiceIT {
         assertTrue(result.isPresent());
         BankAccountDto bankAccountDto = result.get();
 
+        assertThat(bankAccountDto.accountId()).isEqualTo("meir.lustig@gmail.com");
         assertThat(bankAccountDto.firstName()).isEqualTo("Meir");
         assertThat(bankAccountDto.lastName()).isEqualTo("Lustig");
         assertThat(bankAccountDto.balance().intValue()).isEqualTo(1_000_000);
@@ -88,23 +92,23 @@ public class BankAccountServiceIT {
         assertThat(bankAccountDto.active()).isTrue();
         assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
 
-        service.deleteBankAccountById(1L);
+        service.deleteBankAccountByAccountId("meir.lustig@gmail.com");
 
-        assertThrows(EntityNotFoundException.class, () -> service.getAccountInfo(1L));
+        assertThrows(EntityNotFoundException.class, () -> service.getAccountInfo("meir.lustig@gmail.com"));
     }
 
     @Test
-    @DisplayName("Test activate bank account. BankAccount[id = 2]")
+    @DisplayName("Test activate bank account.")
     public void activateAccount() {
 
-        Optional<BankAccountDto> result = service.getAccountInfo(2L);
+        Optional<BankAccountDto> result = service.getAccountInfo("franklin.benjamin@gmail.com");
 
         assertThat(result.isPresent()).isTrue();
 
         BankAccountDto bankAccountDto = result.get();
         assertThat(bankAccountDto.active()).isFalse();
 
-        result = service.activateAccount(2L);
+        result = service.activateAccount("franklin.benjamin@gmail.com");
 
         assertThat(result.isPresent()).isTrue();
 
@@ -113,23 +117,23 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    @DisplayName("Test activate not-exists bank account. BankAccount[id = 3]")
+    @DisplayName("Test activate not-exists bank account.")
     public void activateAccount_WithNotExistsBankAccount() {
-        assertThrows(EntityNotFoundException.class, () -> service.activateAccount(3L));
+        assertThrows(EntityNotFoundException.class, () -> service.activateAccount("fake@gmail.com"));
     }
 
     @Test
-    @DisplayName("Test deactivate bank account. BankAccount[id = 1]")
+    @DisplayName("Test deactivate bank account.")
     public void deactivateAccount() {
 
-        Optional<BankAccountDto> result = service.getAccountInfo(1L);
+        Optional<BankAccountDto> result = service.getAccountInfo("theodore.roosevelt@gmail.com");
 
         assertThat(result.isPresent()).isTrue();
 
         BankAccountDto bankAccountDto = result.get();
         assertThat(bankAccountDto.active()).isTrue();
 
-        result = service.deactivateAccount(1L);
+        result = service.deactivateAccount("theodore.roosevelt@gmail.com");
 
         assertThat(result.isPresent()).isTrue();
 
@@ -138,16 +142,16 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    @DisplayName("Test deactivate not-exists bank account. BankAccount[id = 1]")
+    @DisplayName("Test deactivate not-exists bank account.")
     public void deactivateAccount_WithNotExistsBankAccount() {
-        assertThrows(EntityNotFoundException.class, () -> service.deactivateAccount(3L));
+        assertThrows(EntityNotFoundException.class, () -> service.deactivateAccount("fake@gmail.com"));
     }
 
     @Test
-    @DisplayName("Test deposit to a bank account. BankAccount[id = 1]")
+    @DisplayName("Test deposit to a bank account.")
     public void makeDeposit() {
 
-        Optional<BankAccountDto> result = service.makeDeposit(1L, 50);
+        Optional<BankAccountDto> result = service.makeDeposit("theodore.roosevelt@gmail.com", 50);
 
         assertTrue(result.isPresent());
         BankAccountDto bankAccountDto = result.get();
@@ -159,22 +163,22 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    @DisplayName("Test deposit to a bank account and measure time. BankAccount[id = 1]")
+    @DisplayName("Test deposit to a bank account and measure time.")
     public void makeDeposit_measureTime() {
-        assertTimeout(Duration.ofMillis(60), () -> service.makeDeposit(1L, 50));
+        assertTimeout(Duration.ofMillis(60), () -> service.makeDeposit("theodore.roosevelt@gmail.com", 50));
     }
 
     @Test
-    @DisplayName("Test deposit to a not-exists bank account. BankAccount[id = 3], result=EntityNotFoundException")
+    @DisplayName("Test deposit to a not-exists bank account, result=EntityNotFoundException")
     public void makeDeposit_WithNotExistsBankAccount() {
-        assertThrows(EntityNotFoundException.class, () -> service.makeDeposit(3L, 50));
+        assertThrows(EntityNotFoundException.class, () -> service.makeDeposit("fake@gmail.com", 50));
     }
 
     @Test
-    @DisplayName("Test withdraw from a bank account. BankAccount[id = 1]")
+    @DisplayName("Test withdraw from a bank account.")
     public void makeWithdraw() {
 
-        Optional<BankAccountDto> result = service.makeWithdraw(1L, 1999);
+        Optional<BankAccountDto> result = service.makeWithdraw("theodore.roosevelt@gmail.com", 1999);
 
         assertTrue(result.isPresent());
         BankAccountDto bankAccountDto = result.get();
@@ -186,16 +190,16 @@ public class BankAccountServiceIT {
     }
 
     @Test
-    @DisplayName("Test withdraw from a bank account and measure time. BankAccount[id = 1]")
+    @DisplayName("Test withdraw from a bank account and measure time.")
     public void makeWithdraw_measureTime() {
-        assertTimeout(Duration.ofMillis(70), () -> service.makeWithdraw(1L, 50));
+        assertTimeout(Duration.ofMillis(70), () -> service.makeWithdraw("theodore.roosevelt@gmail.com", 50));
     }
 
     @Test
-    @DisplayName("Test withdraw from a bank account until it run-out of the money. BankAccount[id = 1]")
+    @DisplayName("Test withdraw from a bank account until it run-out of the money.")
     public void makeWithdraw_BelowMinimum() {
 
-        Optional<BankAccountDto> result = service.makeWithdraw(1L, 1000);
+        Optional<BankAccountDto> result = service.makeWithdraw("theodore.roosevelt@gmail.com", 1000);
 
         assertTrue(result.isPresent());
         BankAccountDto bankAccountDto = result.get();
@@ -205,7 +209,7 @@ public class BankAccountServiceIT {
         assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
         assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
 
-        result = service.makeWithdraw(1L, 1000);
+        result = service.makeWithdraw("theodore.roosevelt@gmail.com", 1000);
 
         assertTrue(result.isPresent());
         bankAccountDto = result.get();
@@ -215,30 +219,33 @@ public class BankAccountServiceIT {
         assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
         assertThat(bankAccountDto.balance().doubleValue()).isEqualTo(bankAccountDto.minimumBalance().doubleValue());
 
-        assertThrows(InsufficientFundsException.class, () -> service.makeWithdraw(1L, 1000));
+        assertThrows(InsufficientFundsException.class, () -> service.makeWithdraw("theodore.roosevelt@gmail.com", 1000));
     }
 
     @Test
-    @DisplayName("Test withdraw from a not-exists bank account. BankAccount[id = 3], result=EntityNotFoundException")
+    @DisplayName("Test withdraw from a not-exists bank account. result=EntityNotFoundException")
     public void makeWithdraw_WithNotExistsBankAccount() {
-        assertThrows(EntityNotFoundException.class, () -> service.makeWithdraw(3L, 50));
+        assertThrows(EntityNotFoundException.class, () -> service.makeWithdraw("fake@gmail.com", 50));
     }
 
     @Test
-    @DisplayName("Test withdraw from a bank account with not enough money in his account. BankAccount[id = 1], result=InsufficientFundsException")
+    @DisplayName("Test withdraw from a bank account with not enough money in his account. result=InsufficientFundsException")
     public void makeWithdraw_WithNInsufficientFundsException() {
-        assertThrows(InsufficientFundsException.class, () -> service.makeWithdraw(1L, 2001));
+        assertThrows(InsufficientFundsException.class, () -> service.makeWithdraw("theodore.roosevelt@gmail.com", 2001));
     }
 
     @Test
-    @DisplayName("Test withdraw and deposit a few times for the same bank account. BankAccount[id = 1], result=InsufficientFundsException")
+    @DisplayName("Test withdraw and deposit a few times for the same bank account. result=InsufficientFundsException")
     public void makeWithdraw_makeDeposit() {
 
-        assertAll(() -> service.makeWithdraw(1L, 100), () -> service.makeWithdraw(1L, 100),
-                () -> service.makeWithdraw(1L, 100), () -> service.makeDeposit(1L, 1000),
-                () -> service.makeWithdraw(1L, 100), () -> service.makeWithdraw(1L, 100));
+        assertAll(() -> service.makeWithdraw("theodore.roosevelt@gmail.com", 100),
+                () -> service.makeWithdraw("theodore.roosevelt@gmail.com", 100),
+                () -> service.makeWithdraw("theodore.roosevelt@gmail.com", 100),
+                () -> service.makeDeposit("theodore.roosevelt@gmail.com", 1000),
+                () -> service.makeWithdraw("theodore.roosevelt@gmail.com", 100),
+                () -> service.makeWithdraw("theodore.roosevelt@gmail.com", 100));
 
-        Optional<BankAccountDto> result = service.makeWithdraw(1L, 1);
+        Optional<BankAccountDto> result = service.makeWithdraw("theodore.roosevelt@gmail.com", 1);
 
         assertTrue(result.isPresent());
         BankAccountDto bankAccountDto = result.get();

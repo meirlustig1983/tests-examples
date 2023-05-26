@@ -26,8 +26,9 @@ public class BankAccountServiceRepeatedIT {
     @Order(1)
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:/data/recreate-datasets-2.sql")
     public void getAccountInfo() {
-        Optional<BankAccountDto> result = service.getAccountInfo(1L);
+        Optional<BankAccountDto> result = service.getAccountInfo("john.doe@gmail.com");
         assertTrue(result.isPresent());
+        assertThat(result.get().accountId()).isEqualTo("john.doe@gmail.com");
         assertThat(result.get().firstName()).isEqualTo("John");
         assertThat(result.get().lastName()).isEqualTo("Doe");
         assertThat(result.get().balance().doubleValue()).isEqualTo(2000);
@@ -38,8 +39,9 @@ public class BankAccountServiceRepeatedIT {
     @Order(2)
     @RepeatedTest(3)
     public void makeWithdraw() {
-        Optional<BankAccountDto> result = service.makeWithdraw(1L, 500);
+        Optional<BankAccountDto> result = service.makeWithdraw("john.doe@gmail.com", 500);
         assertTrue(result.isPresent());
+        assertThat(result.get().accountId()).isEqualTo("john.doe@gmail.com");
         assertThat(result.get().firstName()).isEqualTo("John");
         assertThat(result.get().lastName()).isEqualTo("Doe");
         assertThat(result.get().balance().doubleValue()).isGreaterThanOrEqualTo(500);
@@ -51,6 +53,6 @@ public class BankAccountServiceRepeatedIT {
     @Test
     @Order(3)
     public void makeWithdraw_MakeWithdrawFor1500_ThrowsInsufficientFundsException() {
-        assertThrows(InsufficientFundsException.class, () -> service.makeWithdraw(1L, 1500));
+        assertThrows(InsufficientFundsException.class, () -> service.makeWithdraw("john.doe@gmail.com", 1500));
     }
 }

@@ -16,6 +16,7 @@ class BankAccountMapperTest {
         BankAccount.BankAccountBuilder builder = BankAccount.builder();
         BankAccount bankAccount = builder
                 .id(1L)
+                .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
                 .lastName("Roosevelt")
                 .balance(BigDecimal.valueOf(4500))
@@ -35,7 +36,8 @@ class BankAccountMapperTest {
     @Test
     void toDao() {
 
-        BankAccountDto bankAccountDto = new BankAccountDto("Theodore", "Roosevelt",
+        BankAccountDto bankAccountDto = new BankAccountDto("theodore.roosevelt@gmail.com",
+                "Theodore", "Roosevelt",
                 BigDecimal.valueOf(3000), BigDecimal.valueOf(1000), false);
 
         BankAccount bankAccount = BankAccountMapper.INSTANCE.toDao(bankAccountDto);

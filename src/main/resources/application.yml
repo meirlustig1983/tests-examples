@@ -35,3 +35,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: postgres
+  mvc:
+    validation:
+      enabled: true
