@@ -3,6 +3,7 @@ package com.ml.testsexamples.exceptions;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,6 +28,13 @@ public class DefaultExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiError);
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrityViolationException(DataIntegrityViolationException e, HttpServletRequest request) {
+        log.error("Unhandled exception occurred. ", e);
+        ApiError apiError = new ApiError(request.getRequestURI(), "Internal SQL error", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiError);
+    }
+
     @ExceptionHandler(InsufficientFundsException.class)
     public ResponseEntity<ApiError> handleInsufficientFundsException(InsufficientFundsException e, HttpServletRequest request) {
         log.error("Unhandled exception occurred. ", e);
@@ -37,19 +45,22 @@ public class DefaultExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         log.error("Unhandled exception occurred. ", e);
-        ApiError apiError = new ApiError(request.getRequestURI(), e.getMessage(), HttpStatus.BAD_REQUEST.value());
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Request validation exception").append(" ").append("[").append("field: ");
+        if (e.getMessage().contains("accountId")) {
+            builder.append("accountId");
+        } else if (e.getMessage().contains("amount")) {
+            builder.append("amount");
+        }
+        builder.append("]");
+
+        ApiError apiError = new ApiError(request.getRequestURI(), builder.toString(), HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
     }
 
     @ExceptionHandler(EmailValidationException.class)
     public ResponseEntity<ApiError> handleEmailValidationException(EmailValidationException e, HttpServletRequest request) {
-        log.error("Unhandled exception occurred. ", e);
-        ApiError apiError = new ApiError(request.getRequestURI(), e.getMessage(), HttpStatus.BAD_REQUEST.value());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
-    }
-
-    @ExceptionHandler(AmountValidationException.class)
-    public ResponseEntity<ApiError> handleAmountValidationException(AmountValidationException e, HttpServletRequest request) {
         log.error("Unhandled exception occurred. ", e);
         ApiError apiError = new ApiError(request.getRequestURI(), e.getMessage(), HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);

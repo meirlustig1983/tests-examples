@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -24,9 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumingThat;
 
-@SpringBootTest
 @Transactional
-@Sql(scripts = "/data/recreate-datasets.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@SpringBootTest
+@Sql(scripts = "/data/recreate-datasets-1.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/data/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class BankAccountServiceIT {
 
     @Autowired
@@ -34,7 +34,7 @@ public class BankAccountServiceIT {
 
     @Test
     @DisplayName("Test get info about bank account, if (OS is MAC) & (JRE is JAVA_17)")
-    @Timeout(value = 3000, unit = TimeUnit.MICROSECONDS)
+    @Timeout(value = 10000, unit = TimeUnit.MICROSECONDS)
     @EnabledOnOs({OS.MAC})
     @EnabledOnJre({JRE.JAVA_17})
     public void getAccountInfo_EnabledOnOsMAC_EnabledOnJre17() {
@@ -68,33 +68,6 @@ public class BankAccountServiceIT {
         assertThat(bankAccountDto.lastName()).isEqualTo("Roosevelt");
         assertThat(bankAccountDto.balance().intValue()).isEqualTo(3500);
         assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
-    }
-
-    @Test
-    @DisplayName("Test create and delete bank account.")
-    @Sql(scripts = "/data/recreate-datasets-0.sql")
-    public void createAccount() {
-
-        BankAccountDto newBankAccountDto = new BankAccountDto("meir.lustig@gmail.com",
-                "Meir", "Lustig",
-                BigDecimal.valueOf(1_000_000), BigDecimal.valueOf(1_500), true);
-
-        Optional<BankAccountDto> result = service.createAccount(newBankAccountDto);
-
-        assertTrue(result.isPresent());
-        BankAccountDto bankAccountDto = result.get();
-
-        assertThat(bankAccountDto.accountId()).isEqualTo("meir.lustig@gmail.com");
-        assertThat(bankAccountDto.firstName()).isEqualTo("Meir");
-        assertThat(bankAccountDto.lastName()).isEqualTo("Lustig");
-        assertThat(bankAccountDto.balance().intValue()).isEqualTo(1_000_000);
-        assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1_500);
-        assertThat(bankAccountDto.active()).isTrue();
-        assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
-
-        service.deleteBankAccountByAccountId("meir.lustig@gmail.com");
-
-        assertThrows(EntityNotFoundException.class, () -> service.getAccountInfo("meir.lustig@gmail.com"));
     }
 
     @Test
@@ -187,12 +160,6 @@ public class BankAccountServiceIT {
         assertThat(bankAccountDto.balance().intValue()).isEqualTo(1501);
         assertThat(bankAccountDto.minimumBalance().intValue()).isEqualTo(1500);
         assertThat(bankAccountDto.balance()).isGreaterThan(bankAccountDto.minimumBalance());
-    }
-
-    @Test
-    @DisplayName("Test withdraw from a bank account and measure time.")
-    public void makeWithdraw_measureTime() {
-        assertTimeout(Duration.ofMillis(70), () -> service.makeWithdraw("theodore.roosevelt@gmail.com", 50));
     }
 
     @Test

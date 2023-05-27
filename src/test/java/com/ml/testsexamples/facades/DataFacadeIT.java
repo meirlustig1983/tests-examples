@@ -19,10 +19,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@DisplayNameGeneration(CustomDisplayNameGenerator.class)
 @Transactional
-@Sql(scripts = "/data/recreate-datasets.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@SpringBootTest
+@Sql(scripts = "/data/recreate-datasets-1.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/data/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@DisplayNameGeneration(CustomDisplayNameGenerator.class)
 @Timeout(value = 5)
 public class DataFacadeIT {
 

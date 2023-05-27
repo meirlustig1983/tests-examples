@@ -41,6 +41,7 @@ public class Transaction {
 
     @NonNull
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private TransactionType type;
 
     @Builder.Default

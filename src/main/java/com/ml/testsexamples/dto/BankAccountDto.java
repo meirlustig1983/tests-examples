@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import lombok.NonNull;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record BankAccountDto(
         @Email(message = "Invalid email format") @NonNull String accountId,
@@ -11,5 +12,6 @@ public record BankAccountDto(
         @NonNull String lastName,
         @NonNull BigDecimal balance,
         @NonNull BigDecimal minimumBalance,
-        boolean active) {
+        boolean active,
+        List<TransactionDto> transactions) {
 }

@@ -54,7 +54,7 @@ public class BankAccountServiceTest {
 
         BankAccountDto originalBankAccountDto = new BankAccountDto("theodore.roosevelt@gmail.com",
                 "Theodore", "Roosevelt",
-                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500), true);
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500), true, List.of());
 
         when(dataFacade.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.of(original));
         when(mapper.toDto(original)).thenReturn(originalBankAccountDto);
@@ -102,7 +102,7 @@ public class BankAccountServiceTest {
 
         BankAccountDto originalBankAccountDto = new BankAccountDto("theodore.roosevelt.2@gmail.com",
                 "Theodore", "Roosevelt",
-                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500), true);
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500), true, List.of());
 
         when(dataFacade.saveBankAccount(originalBankAccount)).thenReturn(Optional.of(originalBankAccount));
         when(mapper.toDto(originalBankAccount)).thenReturn(originalBankAccountDto);
@@ -159,7 +159,7 @@ public class BankAccountServiceTest {
 
         BankAccountDto updatedBankAccountDto = new BankAccountDto("theodore.roosevelt@gmail.com",
                 "Theodore", "Roosevelt",
-                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500), true);
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500), true, List.of());
 
         when(dataFacade.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.of(original));
         when(dataFacade.updateBankAccount("theodore.roosevelt@gmail.com", List.of(Pair.of(BankAccountFields.ACTIVE, "true")))).thenReturn(Optional.of(updated));
@@ -218,7 +218,7 @@ public class BankAccountServiceTest {
 
         BankAccountDto updatedBankAccountDto = new BankAccountDto("theodore.roosevelt@gmail.com",
                 "Theodore", "Roosevelt",
-                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500), false);
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500), false, List.of());
 
         when(dataFacade.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.of(original));
         when(dataFacade.updateBankAccount("theodore.roosevelt@gmail.com", List.of(Pair.of(BankAccountFields.ACTIVE, "false")))).thenReturn(Optional.of(updated));
@@ -277,7 +277,7 @@ public class BankAccountServiceTest {
 
         BankAccountDto updatedBankAccountDto = new BankAccountDto("theodore.roosevelt@gmail.com",
                 "Theodore", "Roosevelt",
-                BigDecimal.valueOf(3550), BigDecimal.valueOf(1500), true);
+                BigDecimal.valueOf(3550), BigDecimal.valueOf(1500), true, List.of());
 
         when(dataFacade.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.of(original));
         when(dataFacade.updateBankAccount("theodore.roosevelt@gmail.com", List.of(Pair.of(BankAccountFields.BALANCE, "3550.0")))).thenReturn(Optional.of(updated));
@@ -356,7 +356,7 @@ public class BankAccountServiceTest {
 
         BankAccountDto updatedBankAccountDto = new BankAccountDto("theodore.roosevelt@gmail.com",
                 "Theodore", "Roosevelt",
-                BigDecimal.valueOf(1501), BigDecimal.valueOf(1500), true);
+                BigDecimal.valueOf(1501), BigDecimal.valueOf(1500), true, List.of());
 
         when(dataFacade.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.of(original));
         when(dataFacade.updateBankAccount("theodore.roosevelt@gmail.com",

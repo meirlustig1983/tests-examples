@@ -4,7 +4,6 @@ import com.ml.testsexamples.dao.BankAccount;
 import com.ml.testsexamples.dto.BankAccountDto;
 import com.ml.testsexamples.enums.BankAccountFields;
 import com.ml.testsexamples.enums.TransactionType;
-import com.ml.testsexamples.exceptions.AmountValidationException;
 import com.ml.testsexamples.exceptions.EmailValidationException;
 import com.ml.testsexamples.exceptions.InactiveAccountException;
 import com.ml.testsexamples.exceptions.InsufficientFundsException;
@@ -81,11 +80,6 @@ public class BankAccountService {
 
     public Optional<BankAccountDto> makeDeposit(String accountId, double amount) {
         log.info("BankAccountService.makeDeposit(accountId,amount) - make a deposit to bank account. accountId: {}, amount: {}", accountId, amount);
-        if (EmailValidator.isValid(accountId)) {
-            throw new EmailValidationException();
-        } else if (amount < 0) {
-            throw new AmountValidationException();
-        }
         Optional<BankAccount> original = dataFacade.findBankAccountByAccountId(accountId);
         if (original.isEmpty()) {
             throw new EntityNotFoundException("Invalid bank account");
@@ -101,11 +95,6 @@ public class BankAccountService {
 
     public Optional<BankAccountDto> makeWithdraw(String accountId, double amount) {
         log.info("BankAccountService.makeWithdraw(id, amount) - make a withdraw for bank account. accountId: {}, amount: {}", accountId, amount);
-        if (EmailValidator.isValid(accountId)) {
-            throw new EmailValidationException();
-        } else if (amount < 0) {
-            throw new AmountValidationException();
-        }
         Optional<BankAccount> original = dataFacade.findBankAccountByAccountId(accountId);
         if (original.isEmpty()) {
             throw new EntityNotFoundException("Invalid bank account");

@@ -1,5 +1,6 @@
 package com.ml.testsexamples.controllers;
 
+import com.ml.testsexamples.requests.TransactionRequest;
 import jakarta.validation.Valid;
 import com.ml.testsexamples.dto.BankAccountDto;
 import com.ml.testsexamples.services.BankAccountService;
@@ -36,27 +37,29 @@ public class BankAccountController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/activate/{accountId}")
+    @PutMapping("/{accountId}/activate")
     public ResponseEntity<BankAccountDto> activateAccount(@PathVariable("accountId") String accountId) {
         Optional<BankAccountDto> activatedAccount = bankAccountService.activateAccount(accountId);
         return activatedAccount.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/deactivate/{accountId}")
+    @PutMapping("/{accountId}/deactivate")
     public ResponseEntity<BankAccountDto> deactivateAccount(@PathVariable("accountId") String accountId) {
         Optional<BankAccountDto> deactivatedAccount = bankAccountService.deactivateAccount(accountId);
         return deactivatedAccount.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/deposit")
-    public ResponseEntity<BankAccountDto> makeDeposit(@RequestParam("accountId") String accountId, @RequestParam("amount") double amount) {
-        Optional<BankAccountDto> updatedAccount = bankAccountService.makeDeposit(accountId, amount);
+    public ResponseEntity<BankAccountDto> makeDeposit(@Valid @RequestBody TransactionRequest transaction) {
+        Optional<BankAccountDto> updatedAccount =
+                bankAccountService.makeDeposit(transaction.accountId(), transaction.amount());
         return updatedAccount.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<BankAccountDto> makeWithdraw(@RequestParam("accountId") String accountId, @RequestParam("amount") double amount) {
-        Optional<BankAccountDto> updatedAccount = bankAccountService.makeWithdraw(accountId, amount);
+    public ResponseEntity<BankAccountDto> makeWithdraw(@Valid @RequestBody TransactionRequest transaction) {
+        Optional<BankAccountDto> updatedAccount =
+                bankAccountService.makeWithdraw(transaction.accountId(), transaction.amount());
         return updatedAccount.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 }
