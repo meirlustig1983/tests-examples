@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -537,6 +538,25 @@ public class BankAccountControllerIT {
     void deleteBankAccountWithNoExistsAccountId() throws Exception {
         mockMvc.perform(delete("/api/v1/bank-accounts/{accountId}", "no.exists@gmail.com"))
                 .andExpect(status().isNoContent())
+                .andDo(document("{method-name}"));
+    }
+
+    @Test
+    @Order(34)
+    void makeWithdrawWithWrongFieldType() throws Exception {
+
+        HashMap<String, String> request = new HashMap<>();
+        request.put("accountId", "meir.lustig@gmail.com");
+        request.put("amount", "meir.lustig@gmail.com");
+
+        mockMvc.perform(post("/api/v1/bank-accounts/withdraw")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.path").value("/api/v1/bank-accounts/withdraw"))
+                .andExpect(jsonPath("$.message").value("Wrong field type exception"))
+                .andExpect(jsonPath("$.statusCode").value(400))
                 .andDo(document("{method-name}"));
     }
 }

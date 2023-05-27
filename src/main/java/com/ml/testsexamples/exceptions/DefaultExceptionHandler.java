@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -49,6 +50,13 @@ public class DefaultExceptionHandler {
         String fieldName = e.getMessage().contains("accountId") ? "accountId" : "amount";
         String errorMessage = "Request validation exception [" + "field: " + fieldName + "]";
         return createApiError(request, errorMessage, HttpStatus.BAD_REQUEST.value());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleHttpMessageNotReadableException(HttpMessageNotReadableException e, HttpServletRequest request) {
+        log.error("Unhandled exception occurred. ", e);
+        return createApiError(request, "Wrong field type exception", HttpStatus.BAD_REQUEST.value());
     }
 
     @ExceptionHandler(EmailValidationException.class)

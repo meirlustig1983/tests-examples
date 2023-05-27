@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+import static com.ml.testsexamples.utils.ControllerHelper.getLocation;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/bank-accounts")
@@ -26,7 +28,7 @@ public class BankAccountController {
     @PostMapping
     public ResponseEntity<BankAccountDto> createAccount(@Valid @RequestBody BankAccountDto bankAccountDto) {
         return bankAccountService.createAccount(bankAccountDto)
-                .map(dto -> ResponseEntity.created(null).body(dto))
+                .map(dto -> ResponseEntity.created(getLocation()).body(dto))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid bank account data"));
     }
 
