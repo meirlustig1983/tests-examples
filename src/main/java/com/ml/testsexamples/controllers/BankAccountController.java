@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import com.ml.testsexamples.dto.BankAccountDto;
 import com.ml.testsexamples.services.BankAccountService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,14 +20,14 @@ public class BankAccountController {
     @GetMapping("/{accountId}")
     public ResponseEntity<BankAccountDto> getAccountInfo(@PathVariable("accountId") String accountId) {
         Optional<BankAccountDto> accountInfo = bankAccountService.getAccountInfo(accountId);
-        return accountInfo.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(accountInfo.get());
     }
 
     @PostMapping
     public ResponseEntity<BankAccountDto> createAccount(@Valid @RequestBody BankAccountDto bankAccountDto) {
-        Optional<BankAccountDto> createdAccount = bankAccountService.createAccount(bankAccountDto);
-        return createdAccount.map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
-                .orElse(ResponseEntity.badRequest().build());
+        return bankAccountService.createAccount(bankAccountDto)
+                .map(dto -> ResponseEntity.created(null).body(dto))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid bank account data"));
     }
 
     @DeleteMapping("/{accountId}")
@@ -40,26 +39,26 @@ public class BankAccountController {
     @PutMapping("/{accountId}/activate")
     public ResponseEntity<BankAccountDto> activateAccount(@PathVariable("accountId") String accountId) {
         Optional<BankAccountDto> activatedAccount = bankAccountService.activateAccount(accountId);
-        return activatedAccount.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(activatedAccount.get());
     }
 
     @PutMapping("/{accountId}/deactivate")
     public ResponseEntity<BankAccountDto> deactivateAccount(@PathVariable("accountId") String accountId) {
         Optional<BankAccountDto> deactivatedAccount = bankAccountService.deactivateAccount(accountId);
-        return deactivatedAccount.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(deactivatedAccount.get());
     }
 
     @PostMapping("/deposit")
     public ResponseEntity<BankAccountDto> makeDeposit(@Valid @RequestBody TransactionRequest transaction) {
         Optional<BankAccountDto> updatedAccount =
                 bankAccountService.makeDeposit(transaction.accountId(), transaction.amount());
-        return updatedAccount.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(updatedAccount.get());
     }
 
     @PostMapping("/withdraw")
     public ResponseEntity<BankAccountDto> makeWithdraw(@Valid @RequestBody TransactionRequest transaction) {
         Optional<BankAccountDto> updatedAccount =
                 bankAccountService.makeWithdraw(transaction.accountId(), transaction.amount());
-        return updatedAccount.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(updatedAccount.get());
     }
 }
