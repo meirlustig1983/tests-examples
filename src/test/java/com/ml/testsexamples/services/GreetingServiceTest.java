@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import static org.junit.jupiter.api.Assertions.*;
 
 @MockitoSettings
-class GreetingServiceTest {
+public class GreetingServiceTest {
 
     @InjectMocks
     private GreetingService service;

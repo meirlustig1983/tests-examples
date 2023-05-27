@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Execution(ExecutionMode.CONCURRENT)
 @MockitoSettings
-class GreetingServiceParallelExecutionTest {
+public class GreetingServiceParallelExecutionTest {
 
     @InjectMocks
     private GreetingService service;
@@ -20,24 +20,32 @@ class GreetingServiceParallelExecutionTest {
     @Test
     @DisplayName("Test a standard 'Hello, World!' greeting")
     @SneakyThrows
-    public void greetingTest() throws Exception {
-        Thread.sleep(1_000);
+    public void greetingTest() {
+        sleep();
         assertEquals("Hello, World!", service.greeting());
     }
 
     @Test
     @DisplayName("Test a 'Hello, World!' greeting with argument")
     @SneakyThrows
-    public void greetingTest_WithWorldAsArg() throws Exception {
-        Thread.sleep(1_000);
+    public void greetingTest_WithWorldAsArg() {
+        sleep();
         assertEquals("Hello, World!", service.greeting("World"));
     }
 
     @Test
     @DisplayName("Test a 'Hello, Master Splinter!' greeting with argument")
     @SneakyThrows
-    public void greetingTest_WithMasterSplinterArg() throws Exception {
-        Thread.sleep(1_000);
+    public void greetingTest_WithMasterSplinterArg() {
+        sleep();
         assertEquals("Hello, Master Splinter!", service.greeting("Master Splinter"));
+    }
+
+    private static void sleep() {
+        try {
+            Thread.sleep(1_000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
