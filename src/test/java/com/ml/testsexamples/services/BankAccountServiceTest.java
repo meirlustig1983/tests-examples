@@ -41,8 +41,7 @@ public class BankAccountServiceTest {
     @DisplayName("Test get an info about bank account and run some tests it the account is active.")
     public void getAccountInfo_GetInfoForBankAccount() {
 
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount original = builder
+        BankAccount original = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
@@ -89,8 +88,7 @@ public class BankAccountServiceTest {
     @DisplayName("Test create new bank account.")
     public void createAccount() {
 
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount originalBankAccount = builder
+        BankAccount originalBankAccount = BankAccount.builder()
                 .id(3L)
                 .accountId("theodore.roosevelt.2@gmail.com")
                 .firstName("Theodore")
@@ -136,8 +134,7 @@ public class BankAccountServiceTest {
     @DisplayName("Test activate bank account")
     public void activateAccount() {
 
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount original = builder
+        BankAccount original = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
@@ -147,7 +144,7 @@ public class BankAccountServiceTest {
                 .active(false)
                 .build();
 
-        BankAccount updated = builder
+        BankAccount updated = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
@@ -194,9 +191,7 @@ public class BankAccountServiceTest {
     @Test
     @DisplayName("Test deactivate bank account.")
     public void deactivateAccount() {
-
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount original = builder
+        BankAccount original = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
@@ -206,7 +201,7 @@ public class BankAccountServiceTest {
                 .active(true)
                 .build();
 
-        BankAccount updated = builder
+        BankAccount updated = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
@@ -253,9 +248,7 @@ public class BankAccountServiceTest {
     @Test
     @DisplayName("Test deposit to bank account.")
     public void makeDeposit() {
-
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount original = builder
+        BankAccount original = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
@@ -265,7 +258,7 @@ public class BankAccountServiceTest {
                 .active(true)
                 .build();
 
-        BankAccount updated = builder
+        BankAccount updated = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
@@ -312,8 +305,7 @@ public class BankAccountServiceTest {
     @Test
     @DisplayName("Test deposit to inactive bank account. result=InactiveAccountException")
     public void makeDeposit_WithInactiveAccount() {
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount bankAccount = builder
+        BankAccount bankAccount = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
@@ -332,9 +324,7 @@ public class BankAccountServiceTest {
     @Test
     @DisplayName("Test withdraw from a bank account.")
     public void withdraw() {
-
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount original = builder
+        BankAccount original = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
@@ -344,7 +334,7 @@ public class BankAccountServiceTest {
                 .active(true)
                 .build();
 
-        BankAccount updated = builder
+        BankAccount updated = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
@@ -393,8 +383,7 @@ public class BankAccountServiceTest {
     @Test
     @DisplayName("Test withdraw from inactive bank account. result=InactiveAccountException")
     public void makeWithdraw_WithInactiveAccount() {
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount bankAccount = builder
+        BankAccount bankAccount = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
@@ -414,8 +403,7 @@ public class BankAccountServiceTest {
     @Test
     @DisplayName("Test a withdraw from a bank account with not enough money. result=InsufficientFundsException")
     public void makeWithdraw_WithNInsufficientFundsException() {
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount original = builder
+        BankAccount original = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")

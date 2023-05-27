@@ -91,9 +91,7 @@ public class DataFacadeIT {
 
     @Test
     public void saveBankAccount() {
-
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount bankAccount = builder
+        BankAccount bankAccount = BankAccount.builder()
                 .accountId("meir.lustig@gmail.com")
                 .firstName("Meir")
                 .lastName("Lustig")

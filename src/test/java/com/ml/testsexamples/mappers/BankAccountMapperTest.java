@@ -19,16 +19,14 @@ class BankAccountMapperTest {
     @Test
     void toDto() {
 
-        Transaction.TransactionBuilder transactionBuilder = Transaction.builder();
-        Transaction transaction = transactionBuilder
+        Transaction transaction = Transaction.builder()
                 .id(1L)
                 .bankAccountId(1L)
                 .amount(BigDecimal.valueOf(4500))
                 .type(TransactionType.DEPOSIT)
                 .build();
 
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount bankAccount = builder
+        BankAccount bankAccount = BankAccount.builder()
                 .id(1L)
                 .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")

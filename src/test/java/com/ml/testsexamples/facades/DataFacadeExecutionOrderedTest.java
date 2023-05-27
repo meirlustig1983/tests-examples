@@ -16,9 +16,7 @@ public class DataFacadeExecutionOrderedTest {
     @Test
     @Order(1)
     public void create_TryToCreateANewBankAccount_NewAccountDataSuccessfullyCreated() {
-
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        bankAccount = builder
+        bankAccount = BankAccount.builder()
                 .id(1L)
                 .accountId("meir.lustig@gmail.com")
                 .firstName("Meir")

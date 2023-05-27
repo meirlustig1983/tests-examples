@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @MockitoSettings
@@ -32,209 +31,166 @@ public class DataFacadeTest {
 
     @Test
     public void findAllBankAccounts() {
-
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount bankAccount1 = builder
-                .id(1L)
-                .accountId("theodore.roosevelt@gmail.com")
-                .firstName("Theodore")
-                .lastName("Roosevelt")
-                .balance(BigDecimal.valueOf(3500))
-                .minimumBalance(BigDecimal.valueOf(1500))
-                .build();
-
-        BankAccount bankAccount2 = builder
-                .id(2L)
-                .accountId("franklin.benjamin@gmail.com")
-                .firstName("Franklin")
-                .lastName("Benjamin")
-                .balance(BigDecimal.valueOf(0))
-                .minimumBalance(BigDecimal.valueOf(-1000))
-                .build();
-
+        // Arrange
+        BankAccount bankAccount1 = createBankAccount(1L, "theodore.roosevelt@gmail.com", "Theodore", "Roosevelt",
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500));
+        BankAccount bankAccount2 = createBankAccount(2L, "franklin.benjamin@gmail.com", "Franklin", "Benjamin",
+                BigDecimal.valueOf(0), BigDecimal.valueOf(-1000));
         when(repository.findAll()).thenReturn(List.of(bankAccount1, bankAccount2));
 
+        // Act
         List<BankAccount> result = dataFacade.findAllBankAccounts();
 
+        // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
-
-        assertEquals(1L, result.get(0).getId());
-        assertEquals("theodore.roosevelt@gmail.com", result.get(0).getAccountId());
-        assertEquals("Theodore", result.get(0).getFirstName());
-        assertEquals("Roosevelt", result.get(0).getLastName());
-        assertEquals(3500, result.get(0).getBalance().intValue());
-        assertEquals(1500, result.get(0).getMinimumBalance().intValue());
-        assertInstanceOf(LocalDateTime.class, result.get(0).getCreatedAt());
-        assertInstanceOf(LocalDateTime.class, result.get(0).getUpdatedAt());
-
-        assertEquals(2L, result.get(1).getId());
-        assertEquals("franklin.benjamin@gmail.com", result.get(1).getAccountId());
-        assertEquals("Franklin", result.get(1).getFirstName());
-        assertEquals("Benjamin", result.get(1).getLastName());
-        assertEquals(0, result.get(1).getBalance().intValue());
-        assertEquals(-1000, result.get(1).getMinimumBalance().intValue());
-        assertInstanceOf(LocalDateTime.class, result.get(1).getCreatedAt());
-        assertInstanceOf(LocalDateTime.class, result.get(1).getUpdatedAt());
-
+        assertBankAccountEquals(bankAccount1, result.get(0));
+        assertBankAccountEquals(bankAccount2, result.get(1));
         verify(repository).findAll();
         verifyNoMoreInteractions(repository);
     }
 
     @Test
-    public void findBankAccountByAccountId() {
-
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount bankAccount = builder
-                .id(1L)
-                .accountId("theodore.roosevelt@gmail.com")
-                .firstName("Theodore")
-                .lastName("Roosevelt")
-                .balance(BigDecimal.valueOf(3500))
-                .minimumBalance(BigDecimal.valueOf(1500))
-                .build();
-
+    public void findBankAccountByAccountId_ExistingAccountId_ReturnsBankAccount() {
+        // Arrange
+        BankAccount bankAccount = createBankAccount(1L, "theodore.roosevelt@gmail.com", "Theodore", "Roosevelt",
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500));
         when(repository.findBankAccountByAccountId("theodore.roosevelt@gmail.com"))
                 .thenReturn(Optional.of(bankAccount));
 
+        // Act
         Optional<BankAccount> result = dataFacade.findBankAccountByAccountId("theodore.roosevelt@gmail.com");
 
+        // Assert
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
-        assertEquals("theodore.roosevelt@gmail.com", result.get().getAccountId());
-        assertEquals("Theodore", result.get().getFirstName());
-        assertEquals("Roosevelt", result.get().getLastName());
-        assertEquals(3500, result.get().getBalance().intValue());
-        assertEquals(1500, result.get().getMinimumBalance().intValue());
-        assertInstanceOf(LocalDateTime.class, result.get().getCreatedAt());
-        assertInstanceOf(LocalDateTime.class, result.get().getUpdatedAt());
-
+        assertBankAccountEquals(bankAccount, result.get());
         verify(repository).findBankAccountByAccountId("theodore.roosevelt@gmail.com");
         verifyNoMoreInteractions(repository);
     }
 
     @Test
-    public void findBankAccountByAccountId_FindBankAccountForNotExistsAccountId_EmptyOptional() {
+    public void findBankAccountByAccountId_NonExistingAccountId_ReturnsEmptyOptional() {
+        // Arrange
         when(repository.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.empty());
 
+        // Act
         Optional<BankAccount> result = dataFacade.findBankAccountByAccountId("theodore.roosevelt@gmail.com");
 
+        // Assert
         assertFalse(result.isPresent());
-
         verify(repository).findBankAccountByAccountId("theodore.roosevelt@gmail.com");
         verifyNoMoreInteractions(repository);
     }
 
     @Test
-    public void saveBankAccount() {
-
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount bankAccount = builder
-                .id(1L)
-                .accountId("theodore.roosevelt@gmail.com")
-                .firstName("Theodore")
-                .lastName("Roosevelt")
-                .balance(BigDecimal.valueOf(3500))
-                .minimumBalance(BigDecimal.valueOf(1500))
-                .build();
-
+    public void saveBankAccount_ValidBankAccount_ReturnsSavedBankAccount() {
+        // Arrange
+        BankAccount bankAccount = createBankAccount(1L, "theodore.roosevelt@gmail.com", "Theodore", "Roosevelt",
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500));
         when(repository.save(bankAccount)).thenReturn(bankAccount);
 
+        // Act
         Optional<BankAccount> result = dataFacade.saveBankAccount(bankAccount);
 
+        // Assert
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
-        assertEquals("theodore.roosevelt@gmail.com", result.get().getAccountId());
-        assertEquals("Theodore", result.get().getFirstName());
-        assertEquals("Roosevelt", result.get().getLastName());
-        assertEquals(3500, result.get().getBalance().intValue());
-        assertEquals(1500, result.get().getMinimumBalance().intValue());
-        assertInstanceOf(LocalDateTime.class, result.get().getCreatedAt());
-        assertInstanceOf(LocalDateTime.class, result.get().getUpdatedAt());
-
+        assertBankAccountEquals(bankAccount, result.get());
         verify(repository).save(bankAccount);
         verifyNoMoreInteractions(repository);
     }
 
     @Test
-    public void updateBankAccount() {
+    public void updateBankAccount_ExistingAccountIdAndValidFields_ReturnsUpdatedBankAccount() {
+        // Arrange
+        BankAccount originalBankAccount = createBankAccount(1L, "theodore.roosevelt@gmail.com", "Theodore", "Roosevelt",
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500));
+        BankAccount updatedBankAccount = createBankAccount(1L, "theodore.roosevelt@gmail.com", "Meir", "Roth",
+                BigDecimal.valueOf(10000), BigDecimal.valueOf(0));
 
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount bankAccount = builder
-                .id(1L)
-                .accountId("theodore.roosevelt@gmail.com")
-                .firstName("Theodore")
-                .lastName("Roosevelt")
-                .balance(BigDecimal.valueOf(3500))
-                .minimumBalance(BigDecimal.valueOf(1500))
-                .build();
-
-        BankAccount updatedBankAccount = builder
-                .id(1L)
-                .accountId("theodore.roosevelt@gmail.com")
-                .firstName("Meir")
-                .lastName("Roth")
-                .balance(BigDecimal.valueOf(10000))
-                .minimumBalance(BigDecimal.valueOf(0))
-                .build();
-
-        when(repository.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.of(bankAccount));
+        when(repository.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.of(originalBankAccount));
         when(repository.save(any(BankAccount.class))).thenReturn(updatedBankAccount);
 
+        // Act
         Optional<BankAccount> result = dataFacade.updateBankAccount("theodore.roosevelt@gmail.com",
-                List.of(Pair.of(BankAccountFields.FIRST_NAME, "Meir"),
-                        Pair.of(BankAccountFields.LAST_NAME, "Roth"), Pair.of(BankAccountFields.BALANCE, "10000"),
-                        Pair.of(BankAccountFields.MINIMUM_BALANCE, "0")));
+                List.of(
+                        Pair.of(BankAccountFields.FIRST_NAME, "Meir"),
+                        Pair.of(BankAccountFields.LAST_NAME, "Roth"),
+                        Pair.of(BankAccountFields.BALANCE, "10000"),
+                        Pair.of(BankAccountFields.MINIMUM_BALANCE, "0")
+                ));
 
+        // Assert
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
-        assertEquals("theodore.roosevelt@gmail.com", result.get().getAccountId());
-        assertEquals("Meir", result.get().getFirstName());
-        assertEquals("Roth", result.get().getLastName());
-        assertEquals(10000, result.get().getBalance().intValue());
-        assertEquals(0, result.get().getMinimumBalance().intValue());
-        assertInstanceOf(LocalDateTime.class, result.get().getCreatedAt());
-        assertInstanceOf(LocalDateTime.class, result.get().getUpdatedAt());
-
+        assertBankAccountEquals(updatedBankAccount, result.get());
         verify(repository).findBankAccountByAccountId("theodore.roosevelt@gmail.com");
         verify(repository).save(any(BankAccount.class));
         verifyNoMoreInteractions(repository);
     }
 
     @Test
-    public void updateBankAccount_TryToUpdateBalanceFieldForNotExistsBankAccount_EmptyOptional() {
+    public void updateBankAccount_NonExistingAccountId_ReturnsEmptyOptional() {
+        // Arrange
         when(repository.findBankAccountByAccountId("fake@gmail.com")).thenReturn(Optional.empty());
 
-        Optional<BankAccount> result = dataFacade.updateBankAccount("fake@gmail.com", List.of(Pair.of(BankAccountFields.BALANCE, "1000"), Pair.of(BankAccountFields.BALANCE, "15000")));
+        // Act
+        Optional<BankAccount> result = dataFacade.updateBankAccount("fake@gmail.com",
+                List.of(Pair.of(BankAccountFields.BALANCE, "1000"), Pair.of(BankAccountFields.BALANCE, "15000")));
+
+        // Assert
         assertFalse(result.isPresent());
+        verify(repository).findBankAccountByAccountId("fake@gmail.com");
+        verifyNoMoreInteractions(repository);
     }
 
     @Test
-    public void updateBankAccount_TryToUpdateUnauthorizedField_IllegalArgumentException() {
+    public void updateBankAccount_UnauthorizedField_ThrowsIllegalArgumentException() {
+        // Arrange
+        BankAccount originalBankAccount = createBankAccount(1L, "theodore.roosevelt@gmail.com", "Theodore", "Roosevelt",
+                BigDecimal.valueOf(3500), BigDecimal.valueOf(1500));
+        when(repository.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.of(originalBankAccount));
 
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        BankAccount originalDto = builder
-                .id(1L)
-                .accountId("theodore.roosevelt@gmail.com")
-                .firstName("Theodore")
-                .lastName("Roosevelt")
-                .balance(BigDecimal.valueOf(3500))
-                .minimumBalance(BigDecimal.valueOf(1500))
-                .build();
-
-        when(repository.findBankAccountByAccountId("theodore.roosevelt@gmail.com")).thenReturn(Optional.of(originalDto));
-
+        // Act and Assert
         assertThrows(IllegalArgumentException.class, () -> dataFacade.updateBankAccount("theodore.roosevelt@gmail.com",
-                List.of(Pair.of(BankAccountFields.ID, "1000"), Pair.of(BankAccountFields.BALANCE, "8500"))));
-
+                List.of(
+                        Pair.of(BankAccountFields.ID, "1000"),
+                        Pair.of(BankAccountFields.BALANCE, "8500")
+                )));
         verify(repository).findBankAccountByAccountId("theodore.roosevelt@gmail.com");
         verifyNoMoreInteractions(repository);
     }
 
     @Test
-    public void deleteBankAccountById() {
+    public void deleteBankAccountById_ValidAccountId_DeletesBankAccount() {
+        // Act
         dataFacade.deleteBankAccountByAccountId("theodore.roosevelt@gmail.com");
+
+        // Assert
         verify(repository).deleteByAccountId("theodore.roosevelt@gmail.com");
         verifyNoMoreInteractions(repository);
+    }
+
+    // Helper methods
+
+    private BankAccount createBankAccount(Long id, String accountId, String firstName, String lastName,
+                                          BigDecimal balance, BigDecimal minimumBalance) {
+        return BankAccount.builder()
+                .id(id)
+                .accountId(accountId)
+                .firstName(firstName)
+                .lastName(lastName)
+                .balance(balance)
+                .minimumBalance(minimumBalance)
+                .build();
+    }
+
+    private void assertBankAccountEquals(BankAccount expected, BankAccount actual) {
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getAccountId(), actual.getAccountId());
+        assertEquals(expected.getFirstName(), actual.getFirstName());
+        assertEquals(expected.getLastName(), actual.getLastName());
+        assertEquals(expected.getBalance(), actual.getBalance());
+        assertEquals(expected.getMinimumBalance(), actual.getMinimumBalance());
+        assertInstanceOf(LocalDateTime.class, actual.getCreatedAt());
+        assertInstanceOf(LocalDateTime.class, actual.getUpdatedAt());
     }
 }
