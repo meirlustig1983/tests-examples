@@ -15,9 +15,9 @@ public class BankAccountParameterResolver implements ParameterResolver {
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        BankAccount.BankAccountBuilder builder = BankAccount.builder();
-        return builder
+        return BankAccount.builder()
                 .id(1L)
+                .accountId("theodore.roosevelt@gmail.com")
                 .firstName("Theodore")
                 .lastName("Roosevelt")
                 .balance(BigDecimal.valueOf(3500))

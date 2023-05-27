@@ -22,7 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@Sql(scripts = "/data/recreate-datasets.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/data/recreate-datasets-1.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/data/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayNameGeneration(CustomDisplayNameGenerator.class)
 public class DataFacadeParameterizedIT {
 
@@ -30,9 +31,10 @@ public class DataFacadeParameterizedIT {
     private DataFacade dataFacade;
 
     @ParameterizedTest
-    @ValueSource(strings = {"100", "200", "400", "800"})
+    @ValueSource(strings = {"110", "210", "410", "810"})
     public void updateBankAccount_TryToUpdateBalance_BalanceHasBeenUpdated(String balance) {
-        Optional<BankAccount> result = dataFacade.updateBankAccount(1L, List.of(Pair.of(BankAccountFields.BALANCE, balance)));
+        Optional<BankAccount> result = dataFacade.updateBankAccount("theodore.roosevelt@gmail.com",
+                List.of(Pair.of(BankAccountFields.BALANCE, balance)));
         assertTrue(result.isPresent());
         BankAccount bankAccountResult = result.get();
         assertThat(bankAccountResult.getId().intValue()).isEqualTo(1);
@@ -40,9 +42,10 @@ public class DataFacadeParameterizedIT {
     }
 
     @ParameterizedTest
-    @CsvSource({"100, 200", "400, 800"})
+    @CsvSource({"120, 220", "420, 820"})
     public void updateBankAccount_TryToUpdateBalanceAndMinimumBalanced_BalanceAndMinimumHasBeenUpdated(String balance, String minimumBalance) {
-        Optional<BankAccount> result = dataFacade.updateBankAccount(1L, List.of(Pair.of(BankAccountFields.BALANCE, balance), Pair.of(BankAccountFields.MINIMUM_BALANCE, minimumBalance)));
+        Optional<BankAccount> result = dataFacade.updateBankAccount("theodore.roosevelt@gmail.com",
+                List.of(Pair.of(BankAccountFields.BALANCE, balance), Pair.of(BankAccountFields.MINIMUM_BALANCE, minimumBalance)));
         assertTrue(result.isPresent());
         BankAccount bankAccountResult = result.get();
         assertThat(bankAccountResult.getId().intValue()).isEqualTo(1);
@@ -53,10 +56,11 @@ public class DataFacadeParameterizedIT {
     @ParameterizedTest
     @CsvFileSource(resources = "/tests/tests-data.csv", delimiter = ',')
     public void updateBankAccount_TryToUpdateAllDataFieldsFromCsvFile_AllDataHasBeenUpdated(String firstName, String lastName, String balance, String minimumBalance) {
-        Optional<BankAccount> result = dataFacade.updateBankAccount(1L, List.of(Pair.of(BankAccountFields.FIRST_NAME, firstName),
-                Pair.of(BankAccountFields.LAST_NAME, lastName),
-                Pair.of(BankAccountFields.BALANCE, balance),
-                Pair.of(BankAccountFields.MINIMUM_BALANCE, minimumBalance)));
+        Optional<BankAccount> result = dataFacade.updateBankAccount("theodore.roosevelt@gmail.com",
+                List.of(Pair.of(BankAccountFields.FIRST_NAME, firstName),
+                        Pair.of(BankAccountFields.LAST_NAME, lastName),
+                        Pair.of(BankAccountFields.BALANCE, balance),
+                        Pair.of(BankAccountFields.MINIMUM_BALANCE, minimumBalance)));
 
         assertTrue(result.isPresent());
         BankAccount bankAccountResult = result.get();

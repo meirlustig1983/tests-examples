@@ -1,6 +1,6 @@
 package com.ml.testsexamples.services;
 
-import com.ml.testsexamples.dao.BankAccount;
+import com.ml.testsexamples.dto.BankAccountDto;
 import com.ml.testsexamples.exceptions.InsufficientFundsException;
 import com.ml.testsexamples.utils.CustomDisplayNameGenerator;
 import org.junit.jupiter.api.*;
@@ -24,56 +24,61 @@ public class BankAccountServiceExecutionOrderedIT {
 
     @Test
     @Order(1)
-    @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:/data/recreate-datasets-2.sql")
+    @Sql("classpath:/data/recreate-datasets-2.sql")
     public void getAccountInfo() {
-        Optional<BankAccount> bankAccount = service.getAccountInfo(1L);
-        assertTrue(bankAccount.isPresent());
-        assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
-        assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
-        assertThat(bankAccount.get().getBalance().doubleValue()).isEqualTo(2000);
-        assertThat(bankAccount.get().getMinimumBalance().doubleValue()).isEqualTo(500);
-        assertThat(bankAccount.get().isActive()).isEqualTo(true);
+        Optional<BankAccountDto> result = service.getAccountInfo("john.doe@gmail.com");
+        assertTrue(result.isPresent());
+        assertThat(result.get().accountId()).isEqualTo("john.doe@gmail.com");
+        assertThat(result.get().firstName()).isEqualTo("John");
+        assertThat(result.get().lastName()).isEqualTo("Doe");
+        assertThat(result.get().balance().doubleValue()).isEqualTo(2000);
+        assertThat(result.get().minimumBalance().doubleValue()).isEqualTo(500);
+        assertThat(result.get().active()).isEqualTo(true);
     }
 
     @Test
     @Order(2)
     public void makeDeposit_MakeDepositFor500_BalanceChangedTo2500() {
-        Optional<BankAccount> bankAccount = service.makeDeposit(1L, 500);
-        assertTrue(bankAccount.isPresent());
-        assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
-        assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
-        assertThat(bankAccount.get().getBalance().doubleValue()).isEqualTo(2500);
-        assertThat(bankAccount.get().getMinimumBalance().doubleValue()).isEqualTo(500);
-        assertThat(bankAccount.get().isActive()).isEqualTo(true);
+        Optional<BankAccountDto> result = service.makeDeposit("john.doe@gmail.com", 500);
+        assertTrue(result.isPresent());
+        assertThat(result.get().accountId()).isEqualTo("john.doe@gmail.com");
+        assertThat(result.get().firstName()).isEqualTo("John");
+        assertThat(result.get().lastName()).isEqualTo("Doe");
+        assertThat(result.get().balance().doubleValue()).isEqualTo(2500);
+        assertThat(result.get().minimumBalance().doubleValue()).isEqualTo(500);
+        assertThat(result.get().active()).isEqualTo(true);
     }
 
     @Test
     @Order(3)
     public void makeDeposit_MakeDepositFor500_BalanceChangedTo3000() {
-        Optional<BankAccount> bankAccount = service.makeDeposit(1L, 500);
-        assertTrue(bankAccount.isPresent());
-        assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
-        assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
-        assertThat(bankAccount.get().getBalance().doubleValue()).isEqualTo(3000);
-        assertThat(bankAccount.get().getMinimumBalance().doubleValue()).isEqualTo(500);
-        assertThat(bankAccount.get().isActive()).isEqualTo(true);
+        Optional<BankAccountDto> result = service.makeDeposit("john.doe@gmail.com", 500);
+        assertTrue(result.isPresent());
+        assertThat(result.get().accountId()).isEqualTo("john.doe@gmail.com");
+        assertThat(result.get().firstName()).isEqualTo("John");
+        assertThat(result.get().lastName()).isEqualTo("Doe");
+        assertThat(result.get().balance().doubleValue()).isEqualTo(3000);
+        assertThat(result.get().minimumBalance().doubleValue()).isEqualTo(500);
+        assertThat(result.get().active()).isEqualTo(true);
     }
 
     @Test
     @Order(4)
     public void makeWithdraw_MakeWithdrawFor2500_BalanceChangedTo500() {
-        Optional<BankAccount> bankAccount = service.makeWithdraw(1L, 2500);
-        assertTrue(bankAccount.isPresent());
-        assertThat(bankAccount.get().getFirstName()).isEqualTo("John");
-        assertThat(bankAccount.get().getLastName()).isEqualTo("Doe");
-        assertThat(bankAccount.get().getBalance().doubleValue()).isEqualTo(500);
-        assertThat(bankAccount.get().getMinimumBalance().doubleValue()).isEqualTo(500);
-        assertThat(bankAccount.get().isActive()).isEqualTo(true);
+        Optional<BankAccountDto> result = service.makeWithdraw("john.doe@gmail.com", 2500);
+        assertTrue(result.isPresent());
+        assertThat(result.get().accountId()).isEqualTo("john.doe@gmail.com");
+        assertThat(result.get().firstName()).isEqualTo("John");
+        assertThat(result.get().lastName()).isEqualTo("Doe");
+        assertThat(result.get().balance().doubleValue()).isEqualTo(500);
+        assertThat(result.get().minimumBalance().doubleValue()).isEqualTo(500);
+        assertThat(result.get().active()).isEqualTo(true);
     }
 
     @Test
     @Order(5)
+    @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:/data/clean-database.sql")
     public void makeWithdraw_MakeWithdrawFor1500_ThrowsInsufficientFundsException() {
-        assertThrows(InsufficientFundsException.class, () -> service.makeWithdraw(1L, 1500));
+        assertThrows(InsufficientFundsException.class, () -> service.makeWithdraw("john.doe@gmail.com", 1500));
     }
 }

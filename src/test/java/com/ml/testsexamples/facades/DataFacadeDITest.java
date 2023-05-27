@@ -40,6 +40,7 @@ public class DataFacadeDITest {
         assertEquals(1, result.size());
 
         assertEquals(1L, result.get(0).getId());
+        assertEquals("theodore.roosevelt@gmail.com", result.get(0).getAccountId());
         assertEquals("Theodore", result.get(0).getFirstName());
         assertEquals("Roosevelt", result.get(0).getLastName());
         assertEquals(3500, result.get(0).getBalance().intValue());
