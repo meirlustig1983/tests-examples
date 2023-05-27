@@ -5,9 +5,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
@@ -15,61 +15,57 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class DefaultExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ApiError> handleEntityNotFoundException(EntityNotFoundException e, HttpServletRequest request) {
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiError handleEntityNotFoundException(EntityNotFoundException e, HttpServletRequest request) {
         log.error("Unhandled exception occurred. ", e);
-        ApiError apiError = new ApiError(request.getRequestURI(), e.getMessage(), HttpStatus.NOT_FOUND.value());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
+        return createApiError(request, e.getMessage(), HttpStatus.NOT_FOUND.value());
     }
 
     @ExceptionHandler(InactiveAccountException.class)
-    public ResponseEntity<ApiError> handleInactiveAccountException(InactiveAccountException e, HttpServletRequest request) {
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError handleInactiveAccountException(InactiveAccountException e, HttpServletRequest request) {
         log.error("Unhandled exception occurred. ", e);
-        ApiError apiError = new ApiError(request.getRequestURI(), e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiError);
+        return createApiError(request, e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ApiError> handleDataIntegrityViolationException(DataIntegrityViolationException e, HttpServletRequest request) {
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError handleDataIntegrityViolationException(DataIntegrityViolationException e, HttpServletRequest request) {
         log.error("Unhandled exception occurred. ", e);
-        ApiError apiError = new ApiError(request.getRequestURI(), "Internal SQL error", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiError);
+        return createApiError(request, "Internal SQL error", HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
 
     @ExceptionHandler(InsufficientFundsException.class)
-    public ResponseEntity<ApiError> handleInsufficientFundsException(InsufficientFundsException e, HttpServletRequest request) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleInsufficientFundsException(InsufficientFundsException e, HttpServletRequest request) {
         log.error("Unhandled exception occurred. ", e);
-        ApiError apiError = new ApiError(request.getRequestURI(), e.getMessage(), HttpStatus.BAD_REQUEST.value());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+        return createApiError(request, e.getMessage(), HttpStatus.BAD_REQUEST.value());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         log.error("Unhandled exception occurred. ", e);
-
-        StringBuilder builder = new StringBuilder();
-        builder.append("Request validation exception").append(" ").append("[").append("field: ");
-        if (e.getMessage().contains("accountId")) {
-            builder.append("accountId");
-        } else if (e.getMessage().contains("amount")) {
-            builder.append("amount");
-        }
-        builder.append("]");
-
-        ApiError apiError = new ApiError(request.getRequestURI(), builder.toString(), HttpStatus.BAD_REQUEST.value());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+        String fieldName = e.getMessage().contains("accountId") ? "accountId" : "amount";
+        String errorMessage = "Request validation exception [" + "field: " + fieldName + "]";
+        return createApiError(request, errorMessage, HttpStatus.BAD_REQUEST.value());
     }
 
     @ExceptionHandler(EmailValidationException.class)
-    public ResponseEntity<ApiError> handleEmailValidationException(EmailValidationException e, HttpServletRequest request) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleEmailValidationException(EmailValidationException e, HttpServletRequest request) {
         log.error("Unhandled exception occurred. ", e);
-        ApiError apiError = new ApiError(request.getRequestURI(), e.getMessage(), HttpStatus.BAD_REQUEST.value());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+        return createApiError(request, e.getMessage(), HttpStatus.BAD_REQUEST.value());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleExceptions(Exception e, HttpServletRequest request) {
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError handleExceptions(Exception e, HttpServletRequest request) {
         log.error("Unhandled exception occurred", e);
-        ApiError apiError = new ApiError(request.getRequestURI(), e.getMessage(), HttpStatus.NOT_FOUND.value());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
+        return createApiError(request, e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+    }
+
+    private ApiError createApiError(HttpServletRequest request, String message, int statusCode) {
+        return new ApiError(request.getRequestURI(), message, statusCode);
     }
 }
